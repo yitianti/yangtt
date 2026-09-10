@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>杨婷婷的《高级网页设计》课堂实践</title>
+  <style>
+    :root{
+      --bg:#faf7f8;
+      --panel:#ffffff;
+      --muted:#888b90;
+      --accent:#e8c8d2;
+      --accent-light:#f3e7eb;
+      --soft:#f2f2f3;
+      --text-main:#333333;
+      --text-sub:#666666;
+      --radius:16px;
+      --maxw:1200px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, -apple-system, sans-serif;
+      background:linear-gradient(180deg, var(--bg), #f7f5f6);
+      color:var(--text-main);
+      min-height:100vh;
+    }
+    .wrap{
+      max-width:var(--maxw);
+      margin:52px auto;
+      padding:0 28px;
+    }
+
+    /* Hero头部区域 */
+    .hero{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      gap:12px;
+      padding:48px 24px;
+      background:var(--panel);
+      border-radius:var(--radius);
+      box-shadow: 0 8px 30px rgba(160,160,170,0.08);
+      margin-bottom:40px;
+      border:1px solid #f0ecee;
+    }
+    .logo{
+      width:100px;
+      height:100px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-light));
+      border-radius:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:700;
+      font-size:20px;
+      box-shadow:0 12px 24px rgba(232,200,210,0.15);
+      letter-spacing:1px;
+    }
+    h1{
+      margin:0;
+      font-size:36px;
+      line-height:1.1;
+      font-weight:700;
+      letter-spacing:0.3px;
+      color:var(--text-main);
+    }
+    p.lead{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:16px;
+    }
+    .hero-divider{
+      width:72px;
+      height:4px;
+      background:linear-gradient(90deg,var(--accent-light),var(--accent));
+      border-radius:4px;
+      margin-top:10px;
+      opacity:0.8;
+    }
+    .cta{margin-top:16px}
+    .btn{
+      display:inline-block;
+      padding:12px 26px;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--accent-light),var(--accent));
+      color:#444;
+      font-weight:600;
+      text-decoration:none;
+      box-shadow:0 8px 20px rgba(232,200,210,0.12);
+      transition: all 0.3s ease;
+    }
+    .btn:hover{
+      transform: translateY(-3px);
+      box-shadow:0 12px 28px rgba(232,200,210,0.18);
+    }
+
+    /* 卡片网格布局 */
+    .section-title{
+      margin:0 0 20px;
+      font-size:18px;
+      color:var(--text-main);
+      font-weight:600;
+      padding-left:6px;
+      border-left:4px solid var(--accent);
+    }
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:24px;
+      align-items:stretch;
+    }
+    .card{
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+      background:var(--panel);
+      padding:24px;
+      border-radius:var(--radius);
+      border:1px solid #f0ecee;
+      box-shadow:0 10px 26px rgba(140,140,150,0.06);
+      transition: all 0.3s ease;
+    }
+    .card:hover{
+      transform: translateY(-4px);
+      box-shadow:0 16px 36px rgba(140,140,150,0.09);
+    }
+    .dot{
+      width:56px;
+      height:56px;
+      border-radius:14px;
+      background:linear-gradient(135deg,var(--accent-light),var(--accent));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:700;
+      font-size:18px;
+      flex-shrink:0;
+    }
+    .card-body{flex:1}
+    .card a{
+      color:var(--text-main);
+      font-weight:600;
+      text-decoration:none;
+      font-size:17px;
+      transition: color 0.2s;
+    }
+    .card a:hover{
+      color:#b998a4;
+    }
+    .card small{
+      display:block;
+      margin-top:10px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    footer{
+      margin-top:56px;
+      color:var(--muted);
+      font-size:14px;
+      text-align:center;
+      padding-bottom:30px;
+    }
+
+    /* 移动端适配 */
+    @media (max-width:760px){
+      .wrap{padding:0 18px;margin-top:32px;}
+      .logo{width:80px;height:80px;font-size:18px;}
+      .hero{padding:32px 20px;}
+      h1{font-size:28px;}
+      .dot{width:48px;height:48px;font-size:16px;}
+      .cards{gap:18px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="logo">杨婷婷</div>
+      <h1>杨婷婷的《高级网页设计》课堂实践</h1>
+      <p class="lead"></p>
+      <div class="hero-divider"></div>
+      <div class="cta"><a class="btn" href="#modules">查看模块</a></div>
+    </div>
+
+    <div id="modules" class="section-title">课程页面</div>
+    <div class="cards">
+      <div class="card"><div class="dot">H</div><div class="card-body"><a href="html_basic.html">HTML 基础</a><small>语义与常用示例</small></div></div>
+      <div class="card"><div class="dot">S</div><div class="card-body"><a href="ZY.html">自我介绍（ZY.html）</a><small>学生作品</small></div></div>
+      <div class="card"><div class="dot">L</div><div class="card-body"><a href="ZY1.html">示例页面（ZY1.html）</a><small>布局练习</small></div></div>
+      <div class="card"><div class="dot">T</div><div class="card-body"><a href="2.html">练习页面（2.html）</a><small>练习文件</small></div></div>
+      <div class="card"><div class="dot">★</div><div class="card-body"><a href="index.html">课堂首页（当前）</a><small>回到首页</small></div></div>
+    </div>
+
+    <footer>© 杨婷婷课堂 · 本地静态页面</footer>
+  </div>
+</body>
+</html>

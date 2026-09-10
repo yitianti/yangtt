@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言表单</title>
+    <link rel="stylesheet" href="./css/2.css">
+</head>
+<body>
+    <h2 class="title-demo">留言表单页面</h2>
+    <form action="#" name="fm" method="post">
+        <p>昵称：
+            <input type="text" placeholder="请输入昵称" required>
+        </p>
+        <p>
+            <label for="pwd">密码：</label>
+            <input type="password" name="pwd" id="pwd">
+        </p>
+        <p>邮箱：
+            <input type="email" name="email" id="email">
+        </p>
+        <p>上传图片：
+            <input type="file" name="file" id="file" multiple>
+        </p>
+        <p>性别：
+            <input type="radio" name="gender" value="f">女
+            <input type="radio" name="gender" value="m">男
+        </p>
+        <p>爱好：
+            <input type="checkbox" name="hobby" value="code"> coding
+            <input type="checkbox" name="hobby" value="play"> playing
+            <input type="checkbox" name="hobby" value="read"> reading
+        </p>
+        <p>留言内容：
+            <textarea name="intro" id="intro" cols="30" rows="10"></textarea>
+        </p>
+        <p>来自城市：
+            <select name="city" id="city">
+                <option value="dl">大连</option>
+                <option value="xj">新疆</option>
+                <option value="other">其他</option>
+            </select>
+        </p>
+        <p>
+            <input type="submit" value="提交">
+            <input type="reset" value="重置">
+            <input type="button" value="取消">
+        </p>
+    </form>
+    <br>
+    <a href="ZY.html">返回自我介绍主页</a>
+</body>
+</html>
