@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<!-- 学号：24001011024 姓名：杨婷婷 -->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>倒数日</title>
+  <link rel="stylesheet" href="font1/iconfont.css">
+  <link rel="stylesheet" href="daoshuri1024ytt.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- 纯 CSS 切换屏幕用的单选框，不显示 -->
+    <input class="screen-toggle" type="radio" name="screen" id="screen-home" checked>
+    <input class="screen-toggle" type="radio" name="screen" id="screen-daily">
+
+    <!-- ========== 屏幕 1：倒数日 ========== -->
+    <section class="screen screen--home">
+
+      <!-- 一：顶部导航栏 -->
+      <header class="app-header">
+        <button class="icon-btn" type="button" aria-label="菜单">
+          <i class="iconfont icon-hanbaocaidanzhedie"></i>
+        </button>
+
+        <h1 class="app-title">Days Matter · 倒数日</h1>
+
+        <div class="header-actions">
+          <button class="icon-btn" type="button" aria-label="拍照">
+            <i class="iconfont icon-xiangji"></i>
+          </button>
+          <button class="icon-btn" type="button" aria-label="添加">
+            <i class="iconfont icon-jiahao1"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- 二：事件卡片列表 -->
+      <main class="event-list">
+        <article class="event-card event-card--past">
+          <h2 class="event-head">来到这个世界已经</h2>
+          <div class="event-body">
+            <img class="event-bg" src="img/1.jpg" alt="纪念日封面">
+            <p class="event-num">
+              <span class="num">7533</span>
+              <span class="unit">天</span>
+            </p>
+          </div>
+          <p class="event-foot">2006年02月26日</p>
+        </article>
+
+        <article class="event-card">
+          <h2 class="event-head">生日还有</h2>
+          <div class="event-body">
+            <img class="event-bg" src="img/5.jpg" alt="生日封面">
+            <p class="event-num">
+              <span class="num">145</span>
+              <span class="unit">天</span>
+            </p>
+          </div>
+          <p class="event-foot">丁未正月廿九</p>
+        </article>
+
+        <article class="event-card">
+          <h2 class="event-head">New Year还有</h2>
+          <div class="event-body">
+            <img class="event-bg" src="img/4.jpg" alt="新年开始封面">
+            <p class="event-num">
+              <span class="num">81</span>
+              <span class="unit">天</span>
+            </p>
+          </div>
+          <p class="event-foot">2027年01月10日</p>
+        </article>
+
+        <!-- 已过去的事件，用 event-card--past 修饰 -->
+        <article class="event-card event-card--past">
+          <h2 class="event-head">高考完已经</h2>
+          <div class="event-body">
+            <img class="event-bg" src="img/7.jpg" alt="高考结束封面">
+            <p class="event-num">
+              <span class="num">856</span>
+              <span class="unit">天</span>
+            </p>
+          </div>
+          <p class="event-foot">2024年06月08日</p>
+        </article>
+
+      </main>
+
+    </section>
+
+    <!-- ========== 屏幕 2：历史上的今天（底部标签栏第三个） ========== -->
+    <section class="screen screen--daily">
+
+      <header class="app-header">
+        <button class="icon-btn" type="button" aria-label="菜单">
+          <i class="iconfont icon-hanbaocaidanzhedie"></i>
+        </button>
+
+        <h1 class="app-title">历史上的今天</h1>
+
+        <div class="header-actions">
+          <button class="icon-btn" type="button" aria-label="分享">
+            <i class="iconfont icon-a-501623554"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="daily-page">
+
+        <!-- 日期翻牌 -->
+        <div class="date-flip">
+          <span class="date-cell">2</span>
+          <span class="date-cell">0</span>
+          <span class="date-cell">2</span>
+          <span class="date-cell">6</span>
+          <span class="date-sep">,</span>
+          <span class="date-cell">1</span>
+          <span class="date-cell">0</span>
+          <span class="date-sep">,</span>
+          <span class="date-cell">1</span>
+          <span class="date-cell">5</span>
+        </div>
+
+        <!-- iDaily 每日环球视野卡片 -->
+        <article class="daily-card">
+          <h2 class="daily-card-title">iDaily每日环球视野</h2>
+          <div class="daily-card-body">
+            <img class="daily-card-img" src="img/8.png" alt="每日环球视野配图">
+            <div class="daily-card-info">
+              <p class="daily-card-date">October 14, 2026</p>
+              <p class="daily-card-text">SpaceX 猎鹰9号火箭搭载货运龙飞船发射升空，卡纳维拉尔角。10月13日，SpaceX 货运龙飞船执行第35次国际空间站商业补给任务，共运送约2.86吨货物，包括…</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- 历史事件列表 -->
+        <dl class="daily-list">
+          <div class="daily-row">
+            <dt class="daily-label">节日</dt>
+            <dd class="daily-text">
+              <p>农历九月初六</p>
+              <p>世界洗手日（Global Handwashing Day）</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">生日</dt>
+            <dd class="daily-text">
+              <p>埃万杰利斯塔·托里拆利（Evangelista Torricelli，意大利物理学，水银气压计的发明者）</p>
+              <p>尼采（德国哲学家）</p>
+              <p>习仲勋（中国陕甘边区革命根据地的主要创建者和领导者之一）</p>
+              <p>马里奥·普佐（Mario Puzo，意大利裔美国作家，代表作：《教父》）</p>
+              <p>董存瑞</p>
+              <p>郭晶晶</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">1815</dt>
+            <dd class="daily-text">
+              <p>拿破仑一世（Napoleon I）被流放到圣赫勒拿岛。</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">1932</dt>
+            <dd class="daily-text">
+              <p>陈独秀被国民党逮捕入狱，直到1937年国共合作抗日以后获释。</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">1940</dt>
+            <dd class="daily-text">
+              <p>查理·卓别林（Charlie Chaplin Jr.）自导自演的电影《大独裁者》上映。</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">1953</dt>
+            <dd class="daily-text">
+              <p>北京「苏联展览馆」工程动工。苏联展览馆即后来的北京展览馆。</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">1956</dt>
+            <dd class="daily-text">
+              <p>IBM 发布第一本「Fortran 编程参考手册」，是世界上首个现代高级编程语言。</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">1957</dt>
+            <dd class="daily-text">
+              <p>第一座跨越长江的大桥「武汉长江大桥」正式通车，全长1670米。</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">1984</dt>
+            <dd class="daily-text">
+              <p>「江南案」：华裔美籍作家刘宜良在美国遭到台湾当局情报部门雇佣的黑道分子刺杀身亡。</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">1990</dt>
+            <dd class="daily-text">
+              <p>苏联领导人戈尔巴乔夫（Mikhail Gorbachev）因出台新政策推动冷战结束获诺贝尔和平奖。</p>
+            </dd>
+          </div>
+
+          <div class="daily-row">
+            <dt class="daily-label">2003</dt>
+            <dd class="daily-text">
+              <p>中国第一艘载人航天飞船「神舟五号」搭载航天员杨利伟在酒泉卫星发射中心发射升空，进行了完整的太空飞行，于次日降落于四子王旗着陆场，标志着中国成为世界上第三个独立掌握载人航天技术的国家。</p>
+            </dd>
+          </div>
+        </dl>
+
+        <!-- 分享这一天 -->
+        <div class="daily-share">
+          <button class="share-btn" type="button">
+            <i class="iconfont icon-a-501623554 share-icon"></i>分享这一天
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========== 三：底部标签栏（tab） ========== -->
+    <nav class="tab-bar">
+      <label class="tab-item" for="screen-home" aria-label="倒数日">
+        <span class="tab-icon-wrap">
+          <i class="iconfont icon-a-501621447"></i>
+          <span class="cal-day">23</span>
+        </span>
+      </label>
+      <span class="tab-item" aria-label="收藏">
+        <i class="iconfont icon-a-501621448"></i>
+      </span>
+      <label class="tab-item" for="screen-daily" aria-label="发现">
+        <span class="tab-icon-wrap">
+          <i class="iconfont icon-a-501621449"></i>
+          <span class="tab-badge">1</span>
+        </span>
+      </label>
+      <span class="tab-item" aria-label="我的">
+        <img class="tab-avatar" src="img/1.jpg" alt="我的头像">
+      </span>
+      <span class="tab-item" aria-label="更多">
+        <i class="iconfont icon-sangediandian"></i>
+      </span>
+    </nav>
+
+  </div>
+
+</body>
+</html>

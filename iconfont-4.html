@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>移动端底部导航 · Lucide SVG 图标</title>
+    <!-- Lucide 本地资源 -->
+    <script src="cdn/lucide/lucide.min.js"></script>
+    <!--
+    ────────────────────────────────────────────────────────────
+    设计计划：iconfont-4.html（Lucide SVG · 移动端底部导航）
+
+    主题锚点：与 iconfont-3.html 做"字体 vs SVG"的双页对比。
+              页面结构完全对称（手机外壳 + 同 4 tab），
+              但整体设计换一套气质——用冷调灰蓝 + SVG 可定制性。
+
+    配色（独立于 iconfont-3 的 rose 粉）：
+      phone-bg    #dfe3e8   手机外壳灰蓝
+      app-bg      #fafbfc   APP 内页冷白
+      ink         #2d3748   深灰蓝
+      active      #2c5364   选中主色（Lucide 上一版页面用过的深蓝，保持关联）
+      inactive    #a0aec0   未选中灰
+      divider     #e2e8f0   顶部细线
+      badge       #e53e3e   数字徽章红（同 iconfont-3，保持对比公平）
+      dot         #ff4757   红点
+
+    差异点（vs iconfont-3）：
+      - active 色从 #b998a4 变为 #2c5364（蓝 vs 粉，对比明显）
+      - tabbar 毛玻璃背景用冷调白（#fafbfc + blur）
+      - 徽章用描边阴影，红点略小一号
+      - SVG 图标 stroke 可控：active 时 stroke 加粗
+    ────────────────────────────────────────────────────────────
+    -->
+    <style>
+        /* ===== Token ===== */
+        :root{
+            --ytt_phone-bg:#dfe3e8;
+            --ytt_app-bg:#fafbfc;
+            --ytt_ink:#2d3748;
+            --ytt_active:#2c5364;
+            --ytt_active-soft:rgba(44,83,100,.1);
+            --ytt_inactive:#a0aec0;
+            --ytt_divider:#e2e8f0;
+            --ytt_badge:#e53e3e;
+            --ytt_dot:#ff4757;
+            --ytt_tabbar-h:68px;
+            --ytt_statusbar-h:28px;
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        html,body{height:100%;}
+
+        body{
+            font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+            background:var(--ytt_phone-bg);
+            color:var(--ytt_ink);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            min-height:100vh;
+            padding:20px 0;
+        }
+
+        /* ===== 页面顶部 ===== */
+        .ytt_page_top{
+            width:100%;
+            max-width:420px;
+            padding:0 16px 16px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+        .ytt_page_top a{
+            color:var(--ytt_inactive);
+            text-decoration:none;
+            font-size:13px;
+            letter-spacing:.04em;
+            transition:color .2s;
+        }
+        .ytt_page_top a:hover{color:var(--ytt_active);}
+        .ytt_page_top .ytt_page_sub{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_inactive);
+            letter-spacing:.06em;
+        }
+
+        /* ===== 手机容器 ===== */
+        .ytt_phone{
+            width:100%;
+            max-width:420px;
+            height:780px;
+            background:var(--ytt_app-bg);
+            border-radius:36px;
+            box-shadow:
+                0 2px 8px rgba(0,0,0,.04),
+                0 32px 64px -16px rgba(30,40,60,.18);
+            overflow:hidden;
+            position:relative;
+            display:flex;
+            flex-direction:column;
+        }
+
+        /* ===== 状态栏 ===== */
+        .ytt_statusbar{
+            height:var(--ytt_statusbar-h);
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:0 28px;
+            font-size:12px;
+            font-weight:600;
+            color:var(--ytt_ink);
+            flex-shrink:0;
+        }
+        .ytt_statusbar .ytt_icons{display:flex;gap:4px;align-items:center;font-size:11px;}
+
+        /* ===== APP 顶部 ===== */
+        .ytt_appbar{
+            padding:8px 20px 16px;
+            flex-shrink:0;
+        }
+        .ytt_appbar h2{
+            font-size:22px;
+            font-weight:600;
+            color:var(--ytt_ink);
+            letter-spacing:-.01em;
+        }
+        .ytt_appbar p{
+            font-size:13px;
+            color:var(--ytt_inactive);
+            margin-top:4px;
+        }
+
+        /* ===== 内容区 ===== */
+        .ytt_content{
+            flex:1;
+            overflow-y:auto;
+            padding:8px 20px calc(var(--ytt_tabbar-h) + 20px);
+        }
+        .ytt_card{
+            background:#fff;
+            border-radius:16px;
+            padding:20px;
+            margin-bottom:16px;
+            box-shadow:0 1px 2px rgba(0,0,0,.03);
+            border:1px solid rgba(0,0,0,.02);
+        }
+        .ytt_card h3{
+            font-size:15px;
+            font-weight:600;
+            margin-bottom:6px;
+        }
+        .ytt_card p{
+            font-size:13px;
+            color:var(--ytt_inactive);
+            line-height:1.6;
+        }
+        .ytt_tag{
+            display:inline-block;
+            font-size:11px;
+            padding:2px 8px;
+            border-radius:4px;
+            background:var(--ytt_active);
+            color:#fff;
+            margin-bottom:10px;
+        }
+
+        /* ===== Tab Bar ===== */
+        .ytt_tabbar{
+            position:absolute;
+            bottom:0;left:0;right:0;
+            height:calc(var(--ytt_tabbar-h) + env(safe-area-inset-bottom));
+            padding-bottom:env(safe-area-inset-bottom);
+            background:rgba(250,251,252,.88);
+            backdrop-filter:saturate(180%) blur(20px);
+            -webkit-backdrop-filter:saturate(180%) blur(20px);
+            border-top:1px solid var(--ytt_divider);
+            display:flex;
+            z-index:99;
+        }
+
+        .ytt_tab{
+            flex:1;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:3px;
+            position:relative;
+            cursor:pointer;
+            color:var(--ytt_inactive);
+            transition:color .2s ease;
+            user-select:none;
+            -webkit-tap-highlight-color:transparent;
+        }
+
+        /* SVG 图标 */
+        .ytt_tab svg{
+            width:24px;height:24px;
+            stroke:currentColor;
+            stroke-width:1.8;
+            transition:stroke-width .2s ease, transform .2s ease;
+        }
+        .ytt_tab .ytt_tab_label{
+            font-size:10px;
+            letter-spacing:.02em;
+            font-weight:500;
+        }
+
+        /* 选中态 */
+        .ytt_tab.ytt_active{color:var(--ytt_active);}
+        .ytt_tab.ytt_active svg{stroke-width:2.4;transform:scale(1.05);}
+
+        /* ===== 数字徽章 ===== */
+        .ytt_badge{
+            position:absolute;
+            top:4px;
+            left:calc(50% + 8px);
+            min-width:18px;
+            height:18px;
+            padding:0 5px;
+            background:var(--ytt_badge);
+            color:#fff;
+            border-radius:9px;
+            font-size:11px;
+            font-weight:600;
+            line-height:18px;
+            text-align:center;
+            box-shadow:0 2px 4px rgba(229,62,62,.35);
+            animation:ytt_badgePop .3s ease;
+        }
+        @keyframes ytt_badgePop{
+            0%{transform:scale(.5);opacity:0;}
+            60%{transform:scale(1.15);}
+            100%{transform:scale(1);opacity:1;}
+        }
+
+        /* ===== 红点 ===== */
+        .ytt_dot{
+            position:absolute;
+            top:7px;
+            left:calc(50% + 10px);
+            width:7px;height:7px;
+            background:var(--ytt_dot);
+            border-radius:50%;
+            box-shadow:0 0 0 2px #fafbfc;
+            animation:ytt_dotPulse 1.8s ease-in-out infinite;
+        }
+        @keyframes ytt_dotPulse{
+            0%,100%{opacity:1;transform:scale(1);}
+            50%{opacity:.5;transform:scale(.8);}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ytt_page_top">
+        <a href="index.html">← 返回首页</a>
+        <span class="ytt_page_sub">LUCIDE · SVG · TAB BAR</span>
+        <a href="iconfont-3.html">字体版 →</a>
+    </div>
+
+    <div class="ytt_phone">
+
+        <!-- 状态栏 -->
+        <div class="ytt_statusbar">
+            <span>9:41</span>
+            <span class="ytt_icons">●●● 100%</span>
+        </div>
+
+        <!-- APP 顶部 -->
+        <div class="ytt_appbar">
+            <h2>发现</h2>
+            <p>今天有 3 条新消息等你查看</p>
+        </div>
+
+        <!-- 内容区 -->
+        <div class="ytt_content">
+            <div class="ytt_card">
+                <span class="ytt_tag">精选</span>
+                <h3>夏日限定系列</h3>
+                <p>全新设计，简约配色，为你的生活增添一抹温柔。使用 Lucide SVG 图标，支持任意尺寸缩放。</p>
+            </div>
+            <div class="ytt_card">
+                <span class="ytt_tag" style="background:#a0aec0;">通知</span>
+                <h3>你有 3 条未读消息</h3>
+                <p>朋友的消息、系统通知和一条新评论，点击下方消息图标查看全部。</p>
+            </div>
+            <div class="ytt_card">
+                <span class="ytt_tag" style="background:#2d3748;">推荐</span>
+                <h3>试试底部导航栏</h3>
+                <p>SVG 图标可通过 stroke-width 控制选中时的视觉权重，比字体图标更灵活。</p>
+            </div>
+            <div class="ytt_card">
+                <h3>更多内容</h3>
+                <p>向下滑动可以看到更多模拟内容，底部 tabbar 始终固定可见。</p>
+            </div>
+            <div class="ytt_card">
+                <h3>设计说明</h3>
+                <p>使用 cdn/lucide.min.js，4 个 SVG 图标：search、message-circle、shopping-bag、user。</p>
+            </div>
+        </div>
+
+        <!-- ============ Tab Bar ============ -->
+        <nav class="ytt_tabbar" id="ytt_tabbar">
+
+            <div class="ytt_tab ytt_active" data-tab="search">
+                <i data-lucide="search"></i>
+                <span class="ytt_tab_label">发现</span>
+            </div>
+
+            <div class="ytt_tab" data-tab="message">
+                <i data-lucide="message-circle"></i>
+                <span class="ytt_tab_label">消息</span>
+                <span class="ytt_badge">3</span>
+            </div>
+
+            <div class="ytt_tab" data-tab="bag">
+                <i data-lucide="shopping-bag"></i>
+                <span class="ytt_tab_label">收藏</span>
+                <span class="ytt_dot"></span>
+            </div>
+
+            <div class="ytt_tab" data-tab="me">
+                <i data-lucide="user"></i>
+                <span class="ytt_tab_label">我的</span>
+            </div>
+
+        </nav>
+
+    </div>
+
+    <script>
+        // 初始化 Lucide
+        function ytt_init(){
+            if(typeof lucide !== 'undefined'){
+                lucide.createIcons();
+            }
+        }
+        ytt_init();
+
+        // tab 点击
+        document.querySelectorAll('#ytt_tabbar .ytt_tab').forEach(function(tab){
+            tab.addEventListener('click',function(){
+                document.querySelectorAll('#ytt_tabbar .ytt_tab').forEach(function(t){
+                    t.classList.remove('ytt_active');
+                });
+                tab.classList.add('ytt_active');
+
+                // 徽章递减
+                var badge = tab.querySelector('.ytt_badge');
+                if(badge){
+                    var n = parseInt(badge.textContent);
+                    if(n>1){
+                        badge.textContent = n-1;
+                        badge.style.animation='none';
+                        badge.offsetHeight;
+                        badge.style.animation='';
+                    }else{
+                        badge.remove();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

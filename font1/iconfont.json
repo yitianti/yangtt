@@ -1,0 +1,121 @@
+{
+  "id": "5238944",
+  "name": "font",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "577313",
+      "name": "加号1",
+      "font_class": "jiahao1",
+      "unicode": "e727",
+      "unicode_decimal": 59175
+    },
+    {
+      "icon_id": "5093354",
+      "name": "相机",
+      "font_class": "xiangji",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    },
+    {
+      "icon_id": "5979984",
+      "name": "汉堡菜单折叠",
+      "font_class": "hanbaocaidanzhedie",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "42926838",
+      "name": "三个点点-copy",
+      "font_class": "sangediandian",
+      "unicode": "ea06",
+      "unicode_decimal": 59910
+    },
+    {
+      "icon_id": "48716424",
+      "name": "501621447",
+      "font_class": "a-501621447",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "48716425",
+      "name": "501621448",
+      "font_class": "a-501621448",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "48716426",
+      "name": "501621449",
+      "font_class": "a-501621449",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "48716471",
+      "name": "501623554",
+      "font_class": "a-501623554",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "48570047",
+      "name": "save",
+      "font_class": "save",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "48570048",
+      "name": "close",
+      "font_class": "close",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "48570049",
+      "name": "message",
+      "font_class": "message",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "48570050",
+      "name": "imgage",
+      "font_class": "imgage",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "48570055",
+      "name": "search",
+      "font_class": "search",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "48570058",
+      "name": "prompt",
+      "font_class": "prompt",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "48570059",
+      "name": "print",
+      "font_class": "print",
+      "unicode": "e607",
+      "unicode_decimal": 58887
+    },
+    {
+      "icon_id": "48570060",
+      "name": "wifi",
+      "font_class": "wifi",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    }
+  ]
+}

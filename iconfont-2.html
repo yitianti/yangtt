@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucide · SVG 线条图标</title>
+    <!-- Lucide 本地资源 -->
+    <script src="cdn/lucide/lucide.min.js"></script>
+    <!--
+    ────────────────────────────────────────────────────────────
+    设计计划：iconfont-2.html（Lucide SVG 图标）
+
+    主题锚点：Lucide 是精确的矢量线条图标系统。
+              页面像一份技术参数手册——干净、精确、可测量。
+              SVG 本质是线条图形，所以用大量细线、直角、
+              等宽数字来暗示"精度"和"计算"的感觉。
+
+    配色（冷灰调 + 粉色点缀，与首页家族保持关联）：
+      paper  #fafbfc   冷静白底
+      ink    #2d3748   深蓝灰主字
+      rose   #e8c8d2   粉色仅用于 accent 数字和分隔线
+      muted  #a0aec0   次要文字
+      rule   #e2e8f0   极细边框色
+
+    字体角色（两种明确分工）：
+      标题/正文  system-ui, "Segoe UI", sans-serif  —— 清晰现代
+      图标名/编号 "SF Mono", Consolas, monospace   —— 精确等宽
+
+    布局概念：细边框网格 + 大呼吸空间 + 编号标注。
+              每个 section 用顶部细分隔线 + 等宽编号，
+              暗示"这是一个新的参数板块"。
+              Hero 用一个圆形取景框包住大号 Lucide star，
+              暗示"这是一个矢量图形的放大检视"。
+
+    设计原则：
+      1. SVG 图标保持本色（muted 灰色 stroke），hover 时微变深色
+      2. 所有卡片无边框圆角 = 2px，用极细线（1px）分隔
+      3. 编号用等宽字体 + 粉色，是页面唯一的彩色元素
+      4. 精确展示 SVG 可定制的三个维度：width / stroke / color
+    ────────────────────────────────────────────────────────────
+    -->
+    <style>
+        /* ===== Token System ===== */
+        :root{
+            --ytt_paper:#fafbfc;
+            --ytt_panel:#ffffff;
+            --ytt_ink:#2d3748;
+            --ytt_rose:#e8c8d2;
+            --ytt_muted:#a0aec0;
+            --ytt_rule:#e2e8f0;
+            --ytt_radius:2px;
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        body{
+            font-family:system-ui,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+            background:var(--ytt_paper);
+            color:var(--ytt_ink);
+            min-height:100vh;
+            padding:48px 24px;
+            line-height:1.7;
+            max-width:1120px;
+            margin:0 auto;
+        }
+
+        /* ===== 返回链接 ===== */
+        .ytt_home_link{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            color:var(--ytt_muted);
+            text-decoration:none;
+            font-size:13px;
+            letter-spacing:.04em;
+            border-bottom:1px solid transparent;
+            padding-bottom:2px;
+            transition:color .25s, border-color .25s;
+            margin-bottom:56px;
+        }
+        .ytt_home_link svg{width:14px;height:14px;}
+        .ytt_home_link:hover{color:var(--ytt_ink);border-color:var(--ytt_ink);}
+
+        /* ===== Hero：圆形取景框 + 等宽标题 ===== */
+        .ytt_hero{
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            text-align:center;
+            margin-bottom:80px;
+            padding-bottom:56px;
+            border-bottom:1px solid var(--ytt_rule);
+        }
+        .ytt_hero_eng{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            letter-spacing:.28em;
+            color:var(--ytt_muted);
+            margin-bottom:40px;
+        }
+        /* 圆形取景框 */
+        .ytt_hero_frame{
+            width:168px;
+            height:168px;
+            border:1px solid var(--ytt_rule);
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin-bottom:36px;
+            position:relative;
+        }
+        /* 取景框四角装饰 */
+        .ytt_hero_frame::before,
+        .ytt_hero_frame::after{
+            content:"";
+            position:absolute;
+            width:14px;height:14px;
+            border:1px solid var(--ytt_rose);
+        }
+        .ytt_hero_frame::before{top:-4px;left:-4px;border-right:none;border-bottom:none;}
+        .ytt_hero_frame::after{bottom:-4px;right:-4px;border-left:none;border-top:none;}
+        .ytt_hero_frame svg{width:72px;height:72px;stroke:var(--ytt_ink);stroke-width:1;}
+
+        .ytt_hero h1{
+            font-weight:500;
+            font-size:40px;
+            color:var(--ytt_ink);
+            letter-spacing:.01em;
+            margin-bottom:12px;
+        }
+        .ytt_hero_meta{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.06em;
+        }
+
+        /* ===== Section ===== */
+        .ytt_section{margin-bottom:80px;}
+        .ytt_section_head{
+            display:flex;
+            align-items:baseline;
+            gap:20px;
+            padding-top:14px;
+            border-top:1px solid var(--ytt_rose);
+            margin-bottom:36px;
+        }
+        .ytt_section_num{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:12px;
+            color:var(--ytt_rose);
+            letter-spacing:.18em;
+        }
+        .ytt_section_title{
+            font-weight:500;
+            font-size:22px;
+            color:var(--ytt_ink);
+        }
+        .ytt_section_sub{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.06em;
+        }
+
+        /* ===== 图标网格：线框分隔 ===== */
+        .ytt_icon_grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(128px,1fr));
+            background:var(--ytt_panel);
+            border:1px solid var(--ytt_rule);
+            border-radius:var(--ytt_radius);
+            overflow:hidden;
+        }
+        .ytt_icon_item{
+            text-align:center;
+            padding:28px 8px 22px;
+            border-right:1px solid var(--ytt_rule);
+            border-bottom:1px solid var(--ytt_rule);
+            cursor:pointer;
+            transition:background .22s ease;
+        }
+        .ytt_icon_item:nth-child(4n){border-right:none;}
+        .ytt_icon_item:nth-last-child(-n+4){border-bottom:none;}
+        @media (max-width:640px){
+            .ytt_icon_item:nth-child(4n){border-right:1px solid var(--ytt_rule);}
+            .ytt_icon_item:nth-child(2n){border-right:none;}
+            .ytt_icon_item:nth-last-child(-n+4){border-bottom:1px solid var(--ytt_rule);}
+            .ytt_icon_item:nth-last-child(-n+2){border-bottom:none;}
+        }
+        .ytt_icon_item:hover{background:#f4f6f8;}
+        .ytt_icon_item svg{
+            width:34px;height:34px;
+            stroke:var(--ytt_muted);
+            transition:stroke .22s ease;
+            display:block;
+            margin:0 auto 14px;
+        }
+        .ytt_icon_item:hover svg{stroke:var(--ytt_ink);}
+        .ytt_icon_name{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.01em;
+        }
+        .ytt_icon_item:hover .ytt_icon_name{color:var(--ytt_ink);}
+
+        /* ===== Spec 区：精确展示 SVG 三个维度 ===== */
+        .ytt_spec{
+            background:var(--ytt_panel);
+            border:1px solid var(--ytt_rule);
+            border-radius:var(--ytt_radius);
+            margin-bottom:20px;
+        }
+        .ytt_spec_head{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:14px 20px;
+            border-bottom:1px solid var(--ytt_rule);
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.08em;
+        }
+        .ytt_spec_head .ytt_tag{color:var(--ytt_ink);}
+        .ytt_spec_body{padding:32px 24px;}
+        .ytt_spec_row{
+            display:flex;
+            gap:40px;
+            flex-wrap:wrap;
+            align-items:center;
+        }
+        .ytt_spec_item{text-align:center;}
+        .ytt_spec_cap{
+            display:block;
+            margin-top:12px;
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.02em;
+        }
+
+        /* ===== 页脚 ===== */
+        .ytt_footer{
+            margin-top:88px;
+            padding-top:32px;
+            border-top:1px solid var(--ytt_rule);
+            text-align:center;
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.1em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="ytt_home_link" data-lucide="arrow-left"></a>
+
+    <!-- Hero 区 -->
+    <header class="ytt_hero">
+        <div class="ytt_hero_eng">LUCIDE · SVG · ICONS</div>
+        <div class="ytt_hero_frame">
+            <i data-lucide="star"></i>
+        </div>
+        <h1>线条图标集</h1>
+        <div class="ytt_hero_meta">24×24 grid &nbsp;·&nbsp; stroke 1.5 &nbsp;·&nbsp; zero dependencies</div>
+    </header>
+
+    <!-- Section 1: 基础图标 -->
+    <section class="ytt_section">
+        <div class="ytt_section_head">
+            <span class="ytt_section_num">01</span>
+            <h2 class="ytt_section_title">基础 Icons</h2>
+            <span class="ytt_section_sub">common · every day</span>
+        </div>
+        <div class="ytt_icon_grid">
+            <div class="ytt_icon_item"><i data-lucide="home"></i><span class="ytt_icon_name">home</span></div>
+            <div class="ytt_icon_item"><i data-lucide="user"></i><span class="ytt_icon_name">user</span></div>
+            <div class="ytt_icon_item"><i data-lucide="mail"></i><span class="ytt_icon_name">mail</span></div>
+            <div class="ytt_icon_item"><i data-lucide="phone"></i><span class="ytt_icon_name">phone</span></div>
+            <div class="ytt_icon_item"><i data-lucide="search"></i><span class="ytt_icon_name">search</span></div>
+            <div class="ytt_icon_item"><i data-lucide="heart"></i><span class="ytt_icon_name">heart</span></div>
+            <div class="ytt_icon_item"><i data-lucide="star"></i><span class="ytt_icon_name">star</span></div>
+            <div class="ytt_icon_item"><i data-lucide="bell"></i><span class="ytt_icon_name">bell</span></div>
+            <div class="ytt_icon_item"><i data-lucide="camera"></i><span class="ytt_icon_name">camera</span></div>
+            <div class="ytt_icon_item"><i data-lucide="music"></i><span class="ytt_icon_name">music</span></div>
+            <div class="ytt_icon_item"><i data-lucide="calendar"></i><span class="ytt_icon_name">calendar</span></div>
+            <div class="ytt_icon_item"><i data-lucide="map-pin"></i><span class="ytt_icon_name">map-pin</span></div>
+            <div class="ytt_icon_item"><i data-lucide="shopping-cart"></i><span class="ytt_icon_name">cart</span></div>
+            <div class="ytt_icon_item"><i data-lucide="settings"></i><span class="ytt_icon_name">settings</span></div>
+            <div class="ytt_icon_item"><i data-lucide="cloud"></i><span class="ytt_icon_name">cloud</span></div>
+            <div class="ytt_icon_item"><i data-lucide="wifi"></i><span class="ytt_icon_name">wifi</span></div>
+            <div class="ytt_icon_item"><i data-lucide="lock"></i><span class="ytt_icon_name">lock</span></div>
+            <div class="ytt_icon_item"><i data-lucide="key"></i><span class="ytt_icon_name">key</span></div>
+            <div class="ytt_icon_item"><i data-lucide="pen"></i><span class="ytt_icon_name">pen</span></div>
+            <div class="ytt_icon_item"><i data-lucide="trash-2"></i><span class="ytt_icon_name">trash</span></div>
+            <div class="ytt_icon_item"><i data-lucide="download"></i><span class="ytt_icon_name">download</span></div>
+            <div class="ytt_icon_item"><i data-lucide="upload"></i><span class="ytt_icon_name">upload</span></div>
+            <div class="ytt_icon_item"><i data-lucide="folder"></i><span class="ytt_icon_name">folder</span></div>
+            <div class="ytt_icon_item"><i data-lucide="file"></i><span class="ytt_icon_name">file</span></div>
+        </div>
+    </section>
+
+    <!-- Section 2: 箭头方向 -->
+    <section class="ytt_section">
+        <div class="ytt_section_head">
+            <span class="ytt_section_num">02</span>
+            <h2 class="ytt_section_title">Arrows & Directions</h2>
+            <span class="ytt_section_sub">navigation · flow</span>
+        </div>
+        <div class="ytt_icon_grid">
+            <div class="ytt_icon_item"><i data-lucide="arrow-up"></i><span class="ytt_icon_name">arrow-up</span></div>
+            <div class="ytt_icon_item"><i data-lucide="arrow-down"></i><span class="ytt_icon_name">arrow-down</span></div>
+            <div class="ytt_icon_item"><i data-lucide="arrow-left"></i><span class="ytt_icon_name">arrow-left</span></div>
+            <div class="ytt_icon_item"><i data-lucide="arrow-right"></i><span class="ytt_icon_name">arrow-right</span></div>
+            <div class="ytt_icon_item"><i data-lucide="chevron-up"></i><span class="ytt_icon_name">chevron-up</span></div>
+            <div class="ytt_icon_item"><i data-lucide="chevron-down"></i><span class="ytt_icon_name">chevron-down</span></div>
+            <div class="ytt_icon_item"><i data-lucide="chevron-left"></i><span class="ytt_icon_name">chevron-left</span></div>
+            <div class="ytt_icon_item"><i data-lucide="chevron-right"></i><span class="ytt_icon_name">chevron-right</span></div>
+            <div class="ytt_icon_item"><i data-lucide="rotate-cw"></i><span class="ytt_icon_name">rotate-cw</span></div>
+            <div class="ytt_icon_item"><i data-lucide="refresh-cw"></i><span class="ytt_icon_name">refresh-cw</span></div>
+            <div class="ytt_icon_item"><i data-lucide="maximize"></i><span class="ytt_icon_name">maximize</span></div>
+            <div class="ytt_icon_item"><i data-lucide="minimize"></i><span class="ytt_icon_name">minimize</span></div>
+        </div>
+    </section>
+
+    <!-- Section 3: 通讯媒体 -->
+    <section class="ytt_section">
+        <div class="ytt_section_head">
+            <span class="ytt_section_num">03</span>
+            <h2 class="ytt_section_title">Communications</h2>
+            <span class="ytt_section_sub">talk · listen · share</span>
+        </div>
+        <div class="ytt_icon_grid">
+            <div class="ytt_icon_item"><i data-lucide="message-circle"></i><span class="ytt_icon_name">msg-circle</span></div>
+            <div class="ytt_icon_item"><i data-lucide="message-square"></i><span class="ytt_icon_name">msg-square</span></div>
+            <div class="ytt_icon_item"><i data-lucide="headphones"></i><span class="ytt_icon_name">headphones</span></div>
+            <div class="ytt_icon_item"><i data-lucide="play"></i><span class="ytt_icon_name">play</span></div>
+            <div class="ytt_icon_item"><i data-lucide="pause"></i><span class="ytt_icon_name">pause</span></div>
+            <div class="ytt_icon_item"><i data-lucide="skip-back"></i><span class="ytt_icon_name">skip-back</span></div>
+            <div class="ytt_icon_item"><i data-lucide="skip-forward"></i><span class="ytt_icon_name">skip-fwd</span></div>
+            <div class="ytt_icon_item"><i data-lucide="volume-2"></i><span class="ytt_icon_name">volume</span></div>
+            <div class="ytt_icon_item"><i data-lucide="mic"></i><span class="ytt_icon_name">mic</span></div>
+            <div class="ytt_icon_item"><i data-lucide="video"></i><span class="ytt_icon_name">video</span></div>
+            <div class="ytt_icon_item"><i data-lucide="image"></i><span class="ytt_icon_name">image</span></div>
+            <div class="ytt_icon_item"><i data-lucide="paperclip"></i><span class="ytt_icon_name">paperclip</span></div>
+        </div>
+    </section>
+
+    <!-- Section 4: SVG Specs -->
+    <section class="ytt_section">
+        <div class="ytt_section_head">
+            <span class="ytt_section_num">04</span>
+            <h2 class="ytt_section_title">SVG Specifications</h2>
+            <span class="ytt_section_sub">three dimensions of control</span>
+        </div>
+
+        <!-- 尺寸 -->
+        <div class="ytt_spec">
+            <div class="ytt_spec_head">
+                <span>DIMENSION · 01</span>
+                <span class="ytt_tag">width / height</span>
+            </div>
+            <div class="ytt_spec_body">
+                <div class="ytt_spec_row">
+                    <div class="ytt_spec_item"><i data-lucide="star" style="width:16px;height:16px;"></i><span class="ytt_spec_cap">16px</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="star" style="width:24px;height:24px;"></i><span class="ytt_spec_cap">24px</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="star" style="width:32px;height:32px;"></i><span class="ytt_spec_cap">32px</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="star" style="width:48px;height:48px;"></i><span class="ytt_spec_cap">48px</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="star" style="width:64px;height:64px;"></i><span class="ytt_spec_cap">64px</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="star" style="width:96px;height:96px;"></i><span class="ytt_spec_cap">96px</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 描边粗细 -->
+        <div class="ytt_spec">
+            <div class="ytt_spec_head">
+                <span>DIMENSION · 02</span>
+                <span class="ytt_tag">stroke-width</span>
+            </div>
+            <div class="ytt_spec_body">
+                <div class="ytt_spec_row">
+                    <div class="ytt_spec_item"><i data-lucide="circle" style="width:56px;height:56px;stroke-width:1;"></i><span class="ytt_spec_cap">1.0</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="circle" style="width:56px;height:56px;stroke-width:1.5;"></i><span class="ytt_spec_cap">1.5 · 默认</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="circle" style="width:56px;height:56px;stroke-width:2;"></i><span class="ytt_spec_cap">2.0</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="circle" style="width:56px;height:56px;stroke-width:3;"></i><span class="ytt_spec_cap">3.0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 颜色 -->
+        <div class="ytt_spec">
+            <div class="ytt_spec_head">
+                <span>DIMENSION · 03</span>
+                <span class="ytt_tag">stroke color</span>
+            </div>
+            <div class="ytt_spec_body">
+                <div class="ytt_spec_row">
+                    <div class="ytt_spec_item"><i data-lucide="heart" style="width:44px;height:44px;stroke:#2d3748;"></i><span class="ytt_spec_cap">#2d3748</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="heart" style="width:44px;height:44px;stroke:#e8c8d2;"></i><span class="ytt_spec_cap">#e8c8d2</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="heart" style="width:44px;height:44px;stroke:#b998a4;"></i><span class="ytt_spec_cap">#b998a4</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="heart" style="width:44px;height:44px;stroke:#e53e3e;"></i><span class="ytt_spec_cap">#e53e3e</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="heart" style="width:44px;height:44px;stroke:#3182ce;"></i><span class="ytt_spec_cap">#3182ce</span></div>
+                    <div class="ytt_spec_item"><i data-lucide="heart" style="width:44px;height:44px;stroke:#38a169;"></i><span class="ytt_spec_cap">#38a169</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="ytt_footer">LUCIDE · SVG · SPEC SHEET · YTT</footer>
+
+    <!-- Lucide 初始化 -->
+    <script>
+        function ytt_initLucide(){
+            if(typeof lucide !== 'undefined'){
+                lucide.createIcons();
+            }
+        }
+        ytt_initLucide();
+    </script>
+</body>
+</html>

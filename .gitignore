@@ -1,0 +1,36 @@
+# OS
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Node / npm
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+
+# 系统临时文件
+*.tmp
+*.bak
+
+# Trae 预览截图（.pv_*、.preview_*）
+.pv_*.png
+.preview_*.png
+.dbg.html
+.probe.html
+.inject.txt
+
+# 用户临时笔记
+ytt_prompt.md

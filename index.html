@@ -6,197 +6,288 @@
   <title>杨婷婷的《高级网页设计》课堂实践</title>
   <style>
     :root{
-      --bg:#faf7f8;
+      --bg:#f7f5f6;
       --panel:#ffffff;
       --muted:#888b90;
       --accent:#e8c8d2;
       --accent-light:#f3e7eb;
       --soft:#f2f2f3;
-      --text-main:#333333;
+      --text-main:#2c2c34;
       --text-sub:#666666;
-      --radius:16px;
-      --maxw:1200px;
+      --radius:18px;
+      --shadow:0 4px 22px rgba(140,140,150,0.07);
+      --shadow-hover:0 10px 30px rgba(140,140,150,0.11);
     }
+
     *{box-sizing:border-box;margin:0;padding:0;}
+
     body{
-      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, -apple-system, sans-serif;
-      background:linear-gradient(180deg, var(--bg), #f7f5f6);
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+      background: linear-gradient(135deg,#f7f5f6,#faf6f8);
       color:var(--text-main);
       min-height:100vh;
+      padding:40px 20px;
+      line-height:1.6;
+      animation: pageFadeIn 0.7s ease-out;
     }
-    .wrap{
+
+    @keyframes pageFadeIn {
+      from { opacity:0; transform: translateY(12px); }
+      to { opacity:1; transform: translateY(0); }
+    }
+
+    .container{
       max-width:var(--maxw);
-      margin:52px auto;
-      padding:0 28px;
+      margin:0 auto;
     }
 
-    /* Hero头部区域 */
-    .hero{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      text-align:center;
-      gap:12px;
-      padding:48px 24px;
-      background:var(--panel);
-      border-radius:var(--radius);
-      box-shadow: 0 8px 30px rgba(160,160,170,0.08);
-      margin-bottom:40px;
-      border:1px solid #f0ecee;
+    /* 全新简约高级header，白底，低饱和，干净精致 */
+    header{
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 56px 40px;
+      text-align: center;
+      box-shadow: 0 8px 26px rgba(150,145,160,0.06);
+      border: 1px solid #f1ecee;
+      margin-bottom: 40px;
+      transition: 0.35s ease;
+      position: relative;
+      overflow: hidden;
     }
-    .logo{
-      width:100px;
-      height:100px;
-      background:linear-gradient(135deg,var(--accent),var(--accent-light));
-      border-radius:20px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#fff;
-      font-weight:700;
-      font-size:20px;
-      box-shadow:0 12px 24px rgba(232,200,210,0.15);
-      letter-spacing:1px;
-    }
-    h1{
-      margin:0;
-      font-size:36px;
-      line-height:1.1;
-      font-weight:700;
-      letter-spacing:0.3px;
-      color:var(--text-main);
-    }
-    p.lead{
-      margin:8px 0 0;
-      color:var(--muted);
-      font-size:16px;
-    }
-    .hero-divider{
-      width:72px;
-      height:4px;
-      background:linear-gradient(90deg,var(--accent-light),var(--accent));
-      border-radius:4px;
-      margin-top:10px;
-      opacity:0.8;
-    }
-    .cta{margin-top:16px}
-    .btn{
-      display:inline-block;
-      padding:12px 26px;
-      border-radius:999px;
-      background:linear-gradient(90deg,var(--accent-light),var(--accent));
-      color:#444;
-      font-weight:600;
-      text-decoration:none;
-      box-shadow:0 8px 20px rgba(232,200,210,0.12);
-      transition: all 0.3s ease;
-    }
-    .btn:hover{
-      transform: translateY(-3px);
-      box-shadow:0 12px 28px rgba(232,200,210,0.18);
-    }
-
-    /* 卡片网格布局 */
-    .section-title{
-      margin:0 0 20px;
-      font-size:18px;
-      color:var(--text-main);
-      font-weight:600;
-      padding-left:6px;
-      border-left:4px solid var(--accent);
-    }
-    .cards{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-      gap:24px;
-      align-items:stretch;
-    }
-    .card{
-      display:flex;
-      gap:16px;
-      align-items:flex-start;
-      background:var(--panel);
-      padding:24px;
-      border-radius:var(--radius);
-      border:1px solid #f0ecee;
-      box-shadow:0 10px 26px rgba(140,140,150,0.06);
-      transition: all 0.3s ease;
-    }
-    .card:hover{
+    header:hover{
       transform: translateY(-4px);
-      box-shadow:0 16px 36px rgba(140,140,150,0.09);
+      box-shadow: 0 14px 36px rgba(150,145,160,0.09);
     }
-    .dot{
-      width:56px;
-      height:56px;
-      border-radius:14px;
-      background:linear-gradient(135deg,var(--accent-light),var(--accent));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#fff;
-      font-weight:700;
-      font-size:18px;
-      flex-shrink:0;
+
+    /* 左上角细装饰条，淡淡的主色，很小，不抢戏 */
+    header::before{
+      content:"";
+      position:absolute;
+      top:0;
+      left:0;
+      width: 100%;
+      height:4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
     }
-    .card-body{flex:1}
-    .card a{
-      color:var(--text-main);
+
+    .header-eng{
+      font-size:14px;
+      letter-spacing: 4px;
+      color: var(--muted);
+      margin-bottom:18px;
+      text-transform: uppercase;
+    }
+
+    header h1{
+      font-size: 38px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom:18px;
+      letter-spacing:0.3px;
+    }
+
+    .divider{
+      width: 80px;
+      height:3px;
+      background: var(--accent);
+      border-radius:99px;
+      margin:0 auto 22px;
+      opacity:0.75;
+    }
+
+    .header-desc{
+      font-size:16px;
+      color: var(--muted);
+    }
+
+    .catalog-title{
+      font-size:23px;
       font-weight:600;
+      margin-bottom:20px;
+      padding-left:12px;
+      border-left:5px solid var(--accent);
+    }
+    /* 板块小标题样式，区分课堂实践 / 课后作业 */
+    .block-title{
+      font-size:19px;
+      color:#b998a4;
+      margin:30px 0 16px;
+      padding-bottom:8px;
+      border-bottom:1px solid var(--accent-light);
+    }
+    .block-title:first-of-type{
+      margin-top:0;
+    }
+
+    .catalog{
+      background:var(--panel);
+      border-radius:var(--radius);
+      padding:34px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(230,230,232,0.6);
+      transition: 0.3s ease;
+    }
+
+    .catalog:hover{
+      box-shadow:var(--shadow-hover);
+      transform: translateY(-3px);
+    }
+
+    .catalog ul{
+      list-style:none;
+    }
+
+    .catalog li{
+      border-bottom:1px solid var(--soft);
+      transition:0.25s ease;
+    }
+
+    .catalog li:last-child{
+      border-bottom:none;
+    }
+
+    .catalog a{
+      display:block;
+      padding:20px 14px;
+      color:var(--text-main);
       text-decoration:none;
       font-size:17px;
-      transition: color 0.2s;
+      transition:0.3s ease;
+      border-radius:12px;
     }
-    .card a:hover{
+
+    .catalog a:hover{
+      background:var(--accent-light);
+      padding-left:24px;
       color:#b998a4;
     }
-    .card small{
-      display:block;
-      margin-top:10px;
+
+    .page-desc{
       color:var(--muted);
       font-size:14px;
-      line-height:1.5;
+      margin-top:5px;
+    }
+    /* 新增：作业条目标记样式，区分课堂实践与课后作业 */
+    .tag-homework{
+      display:inline-block;
+      font-size:12px;
+      background-color:var(--accent);
+      color:#fff;
+      padding:2px 8px;
+      border-radius:6px;
+      margin-left:8px;
     }
 
-    footer{
-      margin-top:56px;
-      color:var(--muted);
-      font-size:14px;
-      text-align:center;
-      padding-bottom:30px;
+    @media (max-width:720px){
+      header{
+        padding:40px 24px;
+      }
+      header h1{
+        font-size:30px;
+      }
+      .header-eng{
+        font-size:12px;
+      }
     }
-
-    /* 移动端适配 */
-    @media (max-width:760px){
-      .wrap{padding:0 18px;margin-top:32px;}
-      .logo{width:80px;height:80px;font-size:18px;}
-      .hero{padding:32px 20px;}
-      h1{font-size:28px;}
-      .dot{width:48px;height:48px;font-size:16px;}
-      .cards{gap:18px;}
+    @media (max-width:640px){
+      body{padding:24px 14px;}
+      .catalog{padding:22px;}
+      .catalog a{padding:16px 10px;}
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="hero">
-      <div class="logo">杨婷婷</div>
-      <h1>杨婷婷的《高级网页设计》课堂实践</h1>
-      <p class="lead"></p>
-      <div class="hero-divider"></div>
-      <div class="cta"><a class="btn" href="#modules">查看模块</a></div>
-    </div>
+<div class="container">
 
-    <div id="modules" class="section-title">课程页面</div>
-    <div class="cards">
-      <div class="card"><div class="dot">H</div><div class="card-body"><a href="html_basic.html">HTML 基础</a><small>语义与常用示例</small></div></div>
-      <div class="card"><div class="dot">S</div><div class="card-body"><a href="ZY.html">自我介绍（ZY.html）</a><small>学生作品</small></div></div>
-      <div class="card"><div class="dot">L</div><div class="card-body"><a href="ZY1.html">示例页面（ZY1.html）</a><small>布局练习</small></div></div>
-      <div class="card"><div class="dot">T</div><div class="card-body"><a href="2.html">练习页面（2.html）</a><small>练习文件</small></div></div>
-      <div class="card"><div class="dot">★</div><div class="card-body"><a href="index.html">课堂首页（当前）</a><small>回到首页</small></div></div>
-    </div>
+  <header>
+    <div class="header-eng">Advanced Web Design · Course Portfolio</div>
+    <h1>杨婷婷的《高级网页设计》课堂实践</h1>
+    <div class="divider"></div>
+    <p class="header-desc">课程所有网页目录汇总页面</p>
+  </header>
 
-    <footer>© 杨婷婷课堂 · 本地静态页面</footer>
+  <h2 class="catalog-title">课堂目录</h2>
+  <div class="catalog">
+    <h3 class="block-title">课堂实践</h3>
+    <ul>
+      <li>
+        <a href="html_basic.html">1. HTML基础
+          <div class="page-desc">html_basic.html，HTML语义标签与基础示例</div>
+        </a>
+      </li>
+      <li>
+        <a href="zwjs.html">2. 自我介绍网页（主页面）
+          <div class="page-desc">zwjs.html，CSS选择器综合自我介绍页面</div>
+        </a>
+      </li>
+      <li>
+        <a href="zwjs1.html">2-1. 自我介绍配套表单页面
+          <div class="page-desc">zwjs1.html，留言表单，复用zwjs.css样式</div>
+        </a>
+      </li>
+      <li>
+        <a href="selector3.html">3. CSS选择器
+          <div class="page-desc">selector3.html，各类CSS选择器课堂专项练习</div>
+        </a>
+      </li>
+      <li>
+        <a href="test.html">4. 图文布局练习
+          <div class="page-desc">test.html，图文混排与页面布局实训</div>
+        </a>
+      </li>
+      <li>
+        <a href="layout.html">5. 布局练习页面
+          <div class="page-desc">layout.html，flex布局专项练习页面</div>
+        </a>
+      </li>
+      <li>
+        <a href="grid.html">7. Grid网格布局练习
+          <div class="page-desc">grid.html，CSS Grid网格布局课堂练习</div>
+        </a>
+      </li>
+      <li>
+        <a href="svg.html">8. SVG图标练习
+          <div class="page-desc">svg.html，阿里图标库SVG图标与Tab切换</div>
+        </a>
+      </li>
+      <li>
+        <a href="css3.html">9. CSS3动画课堂练习
+          <div class="page-desc">css3.html，CSS3阴影、伪元素、过渡、transform、keyframes动画长征能量站</div>
+        </a>
+      </li>
+      <!-- 新增条目 9、10 -->
+      <li>
+        <a href="dataTy.html">9. dataTy数据类型练习
+          <div class="page-desc">dataTy.html，JS基础数据类型练习页面</div>
+        </a>
+      </li>
+      <li>
+        <a href="daoshuri1024ytt.html">10. 四级项目
+          <div class="page-desc">daoshuri1024ytt.html，倒计时四级项目页面</div>
+        </a>
+      </li>
+      <li>
+        <a href="iconfont-1.html">11. 图标库展示
+          <div class="page-desc">iconfont-1.html &amp; iconfont-2.html，Font Awesome 字体图标与 Lucide SVG 图标双页对比</div>
+        </a>
+      </li>
+      <li>
+        <a href="iconfont-3.html">12. 移动端底部导航
+          <div class="page-desc">iconfont-3.html &amp; iconfont-4.html，iconfont 字体图标与 Lucide SVG 图标的移动端 tab bar 设计</div>
+        </a>
+      </li>
+    </ul>
+
+    <h3 class="block-title">课后作业</h3>
+    <ul>
+      <li>
+        <a href="layout-work.html">6. 网页整体布局课后作业 <span class="tag-homework">课后作业</span>
+          <div class="page-desc">layout-work.html，H5语义标签、overflow溢出裁切与hover缩放动画作业</div>
+        </a>
+      </li>
+    </ul>
   </div>
+
+</div>
 </body>
 </html>

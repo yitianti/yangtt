@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>移动端底部导航 · iconfont 字体图标</title>
+    <!-- 本地 iconfont 字体图标资源 -->
+    <link rel="stylesheet" href="font/iconfont.css">
+    <!--
+    ────────────────────────────────────────────────────────────
+    设计计划：iconfont-3.html（iconfont 字体图标 · 移动端底部导航）
+
+    主题锚点：移动端底部 tab bar，是 APP 的"根导航"。
+              视觉参考 iOS HIG 的 tab bar：半透明毛玻璃 + 顶部细线分隔。
+              但不做 iOS 蓝，用首页的 rose 粉色做选中色，保持家族感。
+
+    配色（与首页家族一致）：
+      phone-bg    #f0eff2   手机外壳灰
+      app-bg      #f7f5f6   APP 内页白底（首页同款）
+      ink         #2c2c34   文字深灰
+      active      #b998a4   选中色（首页 rose）
+      inactive    #9a9aa2   未选中灰
+      divider     #e5e1e4   顶部细线
+      badge       #e53e3e   数字徽章红
+      dot         #ff4757   红点（比徽章亮一号）
+
+    字体角色：
+      tab 文字  system-ui, 无衬线  —— 小而清晰
+      徽章数字  system-ui, bold   —— 醒目
+
+    布局概念：
+      - 外层用 max-width: 420px 模拟手机屏，居中
+      - 顶部状态栏 + 假的 APP 内容区 + 底部固定 tabbar
+      - tabbar 用 position: fixed 在底部，毛玻璃 backdrop-filter
+      - 4 个 tab 平分宽度，选中态文字 + 图标同色，未选中用灰色
+      - 徽章：右上角的小圆形，absolute 定位在图标右上方
+      - 红点：比徽章小，也是 absolute 定位
+    ────────────────────────────────────────────────────────────
+    -->
+    <style>
+        /* ===== Token ===== */
+        :root{
+            --ytt_phone-bg:#e8e6e9;
+            --ytt_app-bg:#f7f5f6;
+            --ytt_ink:#2c2c34;
+            --ytt_active:#b998a4;
+            --ytt_inactive:#9a9aa2;
+            --ytt_divider:#e5e1e4;
+            --ytt_badge:#e53e3e;
+            --ytt_dot:#ff4757;
+            --ytt_tabbar-h:68px;  /* tabbar 高度 */
+            --ytt-statusbar-h:28px;
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        html,body{height:100%;}
+
+        body{
+            font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+            background:var(--ytt_phone-bg);
+            color:var(--ytt_ink);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            min-height:100vh;
+            padding:20px 0;
+        }
+
+        /* ===== 页面标题 & 返回 ===== */
+        .ytt_page_top{
+            width:100%;
+            max-width:420px;
+            padding:0 16px 16px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+        .ytt_page_top a{
+            color:var(--ytt_inactive);
+            text-decoration:none;
+            font-size:13px;
+            letter-spacing:.04em;
+            transition:color .2s;
+        }
+        .ytt_page_top a:hover{color:var(--ytt_active);}
+        .ytt_page_top .ytt_page_sub{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_inactive);
+            letter-spacing:.06em;
+        }
+
+        /* ===== 手机屏幕容器 ===== */
+        .ytt_phone{
+            width:100%;
+            max-width:420px;
+            height:780px;
+            background:var(--ytt_app-bg);
+            border-radius:36px;
+            box-shadow:
+                0 2px 8px rgba(0,0,0,.04),
+                0 32px 64px -16px rgba(0,0,0,.18);
+            overflow:hidden;
+            position:relative;
+            display:flex;
+            flex-direction:column;
+        }
+
+        /* ===== 状态栏 ===== */
+        .ytt_statusbar{
+            height:var(--ytt_statusbar-h);
+            background:transparent;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:0 28px;
+            font-size:12px;
+            font-weight:600;
+            color:var(--ytt_ink);
+            flex-shrink:0;
+        }
+        .ytt_statusbar .ytt_icons{display:flex;gap:4px;align-items:center;font-size:11px;}
+
+        /* ===== APP 顶部导航栏 ===== */
+        .ytt_appbar{
+            padding:8px 20px 16px;
+            flex-shrink:0;
+        }
+        .ytt_appbar h2{
+            font-size:22px;
+            font-weight:600;
+            color:var(--ytt_ink);
+            letter-spacing:-.01em;
+        }
+        .ytt_appbar p{
+            font-size:13px;
+            color:var(--ytt_inactive);
+            margin-top:4px;
+        }
+
+        /* ===== 可滚动内容区 ===== */
+        .ytt_content{
+            flex:1;
+            overflow-y:auto;
+            padding:8px 20px calc(var(--ytt_tabbar-h) + 20px);
+        }
+
+        /* 内容卡片（模拟真实页面） */
+        .ytt_card{
+            background:#fff;
+            border-radius:16px;
+            padding:20px;
+            margin-bottom:16px;
+            box-shadow:0 1px 2px rgba(0,0,0,.03);
+        }
+        .ytt_card h3{
+            font-size:15px;
+            font-weight:600;
+            margin-bottom:6px;
+        }
+        .ytt_card p{
+            font-size:13px;
+            color:var(--ytt_inactive);
+            line-height:1.6;
+        }
+        .ytt_tag{
+            display:inline-block;
+            font-size:11px;
+            padding:2px 8px;
+            border-radius:4px;
+            background:var(--ytt_active);
+            color:#fff;
+            margin-bottom:10px;
+        }
+
+        /* ===== 底部 Tab Bar ===== */
+        .ytt_tabbar{
+            position:absolute;
+            bottom:0;
+            left:0;right:0;
+            height:calc(var(--ytt_tabbar-h) + env(safe-area-inset-bottom));
+            padding-bottom:env(safe-area-inset-bottom);
+            background:rgba(255,255,255,.82);
+            backdrop-filter:saturate(180%) blur(20px);
+            -webkit-backdrop-filter:saturate(180%) blur(20px);
+            border-top:1px solid var(--ytt_divider);
+            display:flex;
+            z-index:99;
+        }
+
+        .ytt_tab{
+            flex:1;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:2px;
+            position:relative;
+            cursor:pointer;
+            color:var(--ytt_inactive);
+            transition:color .2s ease;
+            user-select:none;
+            -webkit-tap-highlight-color:transparent;
+        }
+
+        /* iconfont 图标基础大小 */
+        .ytt_tab .iconfont{
+            font-size:24px;
+            transition:transform .2s ease;
+        }
+        .ytt_tab .ytt_tab_label{
+            font-size:10px;
+            letter-spacing:.02em;
+            font-weight:500;
+        }
+
+        /* 选中态 */
+        .ytt_tab.ytt_active{color:var(--ytt_active);}
+        .ytt_tab.ytt_active .iconfont{transform:scale(1.08);}
+
+        /* ===== 徽章：右上角数字 ===== */
+        .ytt_badge{
+            position:absolute;
+            top:4px;
+            left:calc(50% + 8px);  /* 图标中心 + 偏移 */
+            min-width:18px;
+            height:18px;
+            padding:0 5px;
+            background:var(--ytt_badge);
+            color:#fff;
+            border-radius:9px;
+            font-size:11px;
+            font-weight:600;
+            line-height:18px;
+            text-align:center;
+            box-shadow:0 1px 2px rgba(229,62,62,.4);
+            animation:ytt_badgePop .3s ease;
+        }
+        @keyframes ytt_badgePop{
+            0%{transform:scale(.5);opacity:0;}
+            60%{transform:scale(1.15);}
+            100%{transform:scale(1);opacity:1;}
+        }
+
+        /* ===== 红点 ===== */
+        .ytt_dot{
+            position:absolute;
+            top:6px;
+            left:calc(50% + 10px);
+            width:8px;
+            height:8px;
+            background:var(--ytt_dot);
+            border-radius:50%;
+            box-shadow:0 0 0 2px #fff;  /* 白色描边，防止粘在图标上 */
+            animation:ytt_dotBlink 1.6s ease-in-out infinite;
+        }
+        @keyframes ytt_dotBlink{
+            0%,100%{opacity:1;transform:scale(1);}
+            50%{opacity:.6;transform:scale(.85);}
+        }
+
+        /* ===== home 链接 ===== */
+        .ytt_home_link{
+            color:var(--ytt_inactive);
+            text-decoration:none;
+            font-size:13px;
+            padding:6px 14px;
+            border-radius:20px;
+            background:rgba(255,255,255,.6);
+            transition:color .2s,background .2s;
+        }
+        .ytt_home_link:hover{color:var(--ytt_active);background:#fff;}
+    </style>
+</head>
+<body>
+
+    <!-- 顶部：返回 + 标识 -->
+    <div class="ytt_page_top">
+        <a href="index.html">← 返回首页</a>
+        <span class="ytt_page_sub">ICONFONT · TAB BAR</span>
+        <a href="iconfont-4.html">SVG 版 →</a>
+    </div>
+
+    <!-- 手机容器 -->
+    <div class="ytt_phone">
+
+        <!-- 状态栏 -->
+        <div class="ytt_statusbar">
+            <span>9:41</span>
+            <span class="ytt_icons">●●● 100%</span>
+        </div>
+
+        <!-- APP 顶部 -->
+        <div class="ytt_appbar">
+            <h2>发现</h2>
+            <p>今天有 3 条新消息等你查看</p>
+        </div>
+
+        <!-- 内容区 -->
+        <div class="ytt_content">
+            <div class="ytt_card">
+                <span class="ytt_tag">精选</span>
+                <h3>夏日限定系列</h3>
+                <p>全新设计，简约配色，为你的生活增添一抹温柔。支持本地离线浏览体验。</p>
+            </div>
+            <div class="ytt_card">
+                <span class="ytt_tag" style="background:#888b90;">通知</span>
+                <h3>你有 3 条未读消息</h3>
+                <p>朋友的消息、系统通知和一条新评论，点击下方消息图标查看全部。</p>
+            </div>
+            <div class="ytt_card">
+                <span class="ytt_tag" style="background:#2c2c34;">推荐</span>
+                <h3>试试底部导航栏</h3>
+                <p>消息 tab 右上角有数字徽章，收藏袋上有红点提醒，点击切换看看效果。</p>
+            </div>
+            <div class="ytt_card">
+                <h3>更多内容</h3>
+                <p>向下滑动可以看到更多模拟内容，底部 tabbar 始终固定可见。</p>
+            </div>
+            <div class="ytt_card">
+                <h3>设计说明</h3>
+                <p>使用 font/iconfont.css 中的 4 个字体图标：message、search、bag、decision。</p>
+            </div>
+        </div>
+
+        <!-- ============ 底部 Tab Bar ============ -->
+        <nav class="ytt_tabbar" id="ytt_tabbar">
+
+            <div class="ytt_tab ytt_active" data-tab="search">
+                <i class="iconfont icon-search"></i>
+                <span class="ytt_tab_label">发现</span>
+            </div>
+
+            <div class="ytt_tab" data-tab="message">
+                <i class="iconfont icon-message"></i>
+                <span class="ytt_tab_label">消息</span>
+                <span class="ytt_badge">3</span>
+            </div>
+
+            <div class="ytt_tab" data-tab="bag">
+                <i class="iconfont icon-bag"></i>
+                <span class="ytt_tab_label">收藏</span>
+                <span class="ytt_dot"></span>
+            </div>
+
+            <div class="ytt_tab" data-tab="me">
+                <i class="iconfont icon-decision"></i>
+                <span class="ytt_tab_label">我的</span>
+            </div>
+
+        </nav>
+
+    </div>
+
+    <!-- 交互脚本 -->
+    <script>
+        // tab 点击切换
+        document.querySelectorAll('#ytt_tabbar .ytt_tab').forEach(function(tab){
+            tab.addEventListener('click',function(){
+                // 切换 active
+                document.querySelectorAll('#ytt_tabbar .ytt_tab').forEach(function(t){
+                    t.classList.remove('ytt_active');
+                });
+                tab.classList.add('ytt_active');
+
+                // 简单的"点击消息 tab 后徽章自减"效果
+                var badge = tab.querySelector('.ytt_badge');
+                if(badge){
+                    var n = parseInt(badge.textContent);
+                    if(n>1){
+                        badge.textContent = n-1;
+                        badge.style.animation='none';
+                        badge.offsetHeight;  // 触发重排
+                        badge.style.animation='';
+                    }else{
+                        badge.remove();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

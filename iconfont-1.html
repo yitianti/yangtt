@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Font Awesome · 字体图标标本</title>
+    <!-- Font Awesome 本地资源 -->
+    <link rel="stylesheet" href="cdn/fontawesome/css/all.min.css">
+    <!--
+    ────────────────────────────────────────────────────────────
+    设计计划：iconfont-1.html（Font Awesome 字体图标）
+
+    主题锚点：FA 是基于字体的图标系统——本质是装饰性字体字符。
+              页面像一份博物馆的字体标本册，纸质、安静、让字符本身发光。
+
+    配色（与首页 #f7f5f6 / #e8c8d2 家族呼应）：
+      paper  #f7f5f6   底色（首页同款）
+      ink    #2c2c34   主字（首页同款深字）
+      rose   #b998a4   粉调点缀（首页同款 accent 色）
+      muted  #888b90   次要文字
+      rule   #e8e0e3   柔和分隔线
+
+    字体角色（三种明确分工，避免同质化）：
+      标题区    "Noto Serif SC", Georgia, serif        —— 有温度的衬线
+      图标名    "SF Mono", Consolas, Menlo, monospace —— 精确的等宽
+      正文/导航 system-ui, "Segoe UI", sans-serif      —— 清晰的无衬线
+
+    布局概念：像标本页——直角无圆角、细线分隔、大留白。
+              每个 section 用一条 1px 粉色细线作为顶部装饰，
+              暗示"这是一个新的页/新的标本组"。
+
+    设计原则：
+      1. 让图标本身成为主角，容器安静到退为背景
+      2. 克制的 hover：仅图标颜色微变 + 背景微染 rose，不用 translateY
+      3. 标题字号用衬线大字 + 一个巨大的 FA 图标作 hero，
+         把 FA 字族本身当成了设计元素
+    ────────────────────────────────────────────────────────────
+    -->
+    <style>
+        /* ===== Token System ===== */
+        :root{
+            --ytt_paper:#f7f5f6;
+            --ytt_panel:#ffffff;
+            --ytt_ink:#2c2c34;
+            --ytt_rose:#b998a4;
+            --ytt_rose-soft:#f3e7eb;
+            --ytt_muted:#888b90;
+            --ytt_rule:#e8e0e3;
+            --ytt_radius:2px;    /* 极小圆角，印刷感 */
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        html{scroll-behavior:smooth;}
+
+        body{
+            font-family:system-ui,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+            background:var(--ytt_paper);
+            color:var(--ytt_ink);
+            min-height:100vh;
+            padding:48px 24px;
+            line-height:1.7;
+            max-width:1080px;
+            margin:0 auto;
+        }
+
+        /* ===== 顶部返回链接 —— 安静的印刷风 ===== */
+        .ytt_home_link{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            color:var(--ytt_muted);
+            text-decoration:none;
+            font-size:13px;
+            letter-spacing:.04em;
+            border-bottom:1px solid transparent;
+            transition:color .25s, border-color .25s;
+            margin-bottom:48px;
+        }
+        .ytt_home_link:hover{color:var(--ytt_rose);border-color:var(--ytt_rose);}
+
+        /* ===== Hero 区：衬线大字 + 巨大 FA 图标 ===== */
+        .ytt_hero{
+            text-align:center;
+            margin-bottom:72px;
+            padding-bottom:48px;
+            border-bottom:1px solid var(--ytt_rule);
+        }
+        /* Hero 左侧装饰线 */
+        .ytt_hero::before{
+            content:"";
+            display:block;
+            width:48px;
+            height:2px;
+            background:var(--ytt_rose);
+            margin:0 auto 28px;
+        }
+        .ytt_hero_eng{
+            font-size:11px;
+            letter-spacing:.32em;
+            color:var(--ytt_muted);
+            margin-bottom:20px;
+        }
+        .ytt_hero_fa{
+            font-size:96px;
+            color:var(--ytt_rose);
+            line-height:1;
+            display:block;
+            margin-bottom:20px;
+            opacity:.85;
+        }
+        .ytt_hero h1{
+            font-family:"Noto Serif SC",Georgia,"Times New Roman",serif;
+            font-weight:500;
+            font-size:44px;
+            color:var(--ytt_ink);
+            letter-spacing:.02em;
+            margin-bottom:12px;
+        }
+        .ytt_hero_meta{
+            font-family:"SF Mono",Consolas,Menlo,monospace;
+            font-size:12px;
+            color:var(--ytt_muted);
+            letter-spacing:.06em;
+        }
+
+        /* ===== Section：每页标本的样式 ===== */
+        .ytt_section{
+            margin-bottom:72px;
+        }
+        .ytt_section_head{
+            display:flex;
+            align-items:baseline;
+            gap:16px;
+            padding-top:14px;
+            border-top:1px solid var(--ytt_rule);
+            margin-bottom:32px;
+        }
+        /* 编号：用衬线大写数字做装饰 */
+        .ytt_section_num{
+            font-family:"Noto Serif SC",Georgia,serif;
+            font-size:13px;
+            color:var(--ytt_rose);
+            letter-spacing:.15em;
+        }
+        .ytt_section_title{
+            font-family:"Noto Serif SC",Georgia,serif;
+            font-weight:500;
+            font-size:24px;
+            color:var(--ytt_ink);
+        }
+        .ytt_section_sub{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.06em;
+        }
+
+        /* ===== 图标网格：无装饰，细线分隔 ===== */
+        .ytt_icon_grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(128px,1fr));
+            gap:0;              /* 无 gap，用 border 分隔 */
+            border:1px solid var(--ytt_rule);
+            background:var(--ytt_panel);
+            border-radius:var(--ytt_radius);
+            overflow:hidden;
+        }
+        .ytt_icon_item{
+            text-align:center;
+            padding:28px 8px 22px;
+            border-right:1px solid var(--ytt_rule);
+            border-bottom:1px solid var(--ytt_rule);
+            transition:background .25s ease;
+            cursor:pointer;
+        }
+        /* 去最后一列/行的边框 */
+        .ytt_icon_item:nth-child(4n){border-right:none;}
+        .ytt_icon_item:nth-last-child(-n+4){border-bottom:none;}
+        @media (max-width:640px){
+            .ytt_icon_item:nth-child(4n){border-right:1px solid var(--ytt_rule);}
+            .ytt_icon_item:nth-child(2n){border-right:none;}
+            .ytt_icon_item:nth-last-child(-n+4){border-bottom:1px solid var(--ytt_rule);}
+            .ytt_icon_item:nth-last-child(-n+2){border-bottom:none;}
+        }
+        .ytt_icon_item:hover{background:var(--ytt_rose-soft);}
+        .ytt_icon_item:hover i{color:var(--ytt_ink);}
+        .ytt_icon_item:hover .ytt_icon_name{color:var(--ytt_rose);}
+
+        .ytt_icon_item i{
+            font-size:34px;
+            color:var(--ytt_muted);
+            transition:color .25s ease;
+            display:block;
+            margin-bottom:14px;
+        }
+        .ytt_icon_name{
+            font-family:"SF Mono",Consolas,Menlo,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.02em;
+            transition:color .25s ease;
+        }
+
+        /* ===== Demo 区 ===== */
+        .ytt_demo_row{
+            padding:32px 28px;
+            border:1px solid var(--ytt_rule);
+            background:var(--ytt_panel);
+            border-radius:var(--ytt_radius);
+            margin-bottom:20px;
+        }
+        .ytt_demo_label{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.06em;
+            margin-bottom:18px;
+            text-transform:uppercase;
+        }
+        .ytt_demo_items{
+            display:flex;
+            align-items:center;
+            gap:36px;
+            flex-wrap:wrap;
+        }
+        .ytt_demo_items i{color:var(--ytt_ink);}
+        .ytt_demo_cap{
+            display:block;
+            margin-top:10px;
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.03em;
+            text-align:center;
+        }
+
+        /* ===== 页脚 ===== */
+        .ytt_footer{
+            margin-top:80px;
+            padding-top:32px;
+            border-top:1px solid var(--ytt_rule);
+            text-align:center;
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.1em;
+        }
+
+        /* ===== 动画（克制使用） ===== */
+        .ytt_spin{animation:ytt_spin 3s linear infinite;}
+        @keyframes ytt_spin{from{transform:rotate(0);}to{transform:rotate(360deg);}}
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="ytt_home_link">← 返回首页</a>
+
+    <!-- Hero 区 -->
+    <header class="ytt_hero">
+        <div class="ytt_hero_eng">FONT · AWESOME · v6.5.1</div>
+        <i class="ytt_hero_fa fa-solid fa-font-awesome"></i>
+        <h1>字体标本册</h1>
+        <div class="ytt_hero_meta">glyph specimen &nbsp;·&nbsp; 本地离线 &nbsp;·&nbsp; 三种字族</div>
+    </header>
+
+    <!-- Section 1: Solid -->
+    <section class="ytt_section">
+        <div class="ytt_section_head">
+            <span class="ytt_section_num">01</span>
+            <h2 class="ytt_section_title">Solid — 实心</h2>
+            <span class="ytt_section_sub">fa-solid · 900 weight</span>
+        </div>
+        <div class="ytt_icon_grid">
+            <div class="ytt_icon_item"><i class="fa-solid fa-home"></i><span class="ytt_icon_name">fa-home</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-user"></i><span class="ytt_icon_name">fa-user</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-envelope"></i><span class="ytt_icon_name">fa-envelope</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-phone"></i><span class="ytt_icon_name">fa-phone</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-search"></i><span class="ytt_icon_name">fa-search</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-heart"></i><span class="ytt_icon_name">fa-heart</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-star"></i><span class="ytt_icon_name">fa-star</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-bell"></i><span class="ytt_icon_name">fa-bell</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-camera"></i><span class="ytt_icon_name">fa-camera</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-music"></i><span class="ytt_icon_name">fa-music</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-calendar"></i><span class="ytt_icon_name">fa-calendar</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-location-dot"></i><span class="ytt_icon_name">fa-location-dot</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-cart-shopping"></i><span class="ytt_icon_name">fa-cart-shopping</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-gear"></i><span class="ytt_icon_name">fa-gear</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-cloud"></i><span class="ytt_icon_name">fa-cloud</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-wifi"></i><span class="ytt_icon_name">fa-wifi</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-lock"></i><span class="ytt_icon_name">fa-lock</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-key"></i><span class="ytt_icon_name">fa-key</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-pen"></i><span class="ytt_icon_name">fa-pen</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-trash-can"></i><span class="ytt_icon_name">fa-trash-can</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-download"></i><span class="ytt_icon_name">fa-download</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-upload"></i><span class="ytt_icon_name">fa-upload</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-folder"></i><span class="ytt_icon_name">fa-folder</span></div>
+            <div class="ytt_icon_item"><i class="fa-solid fa-file"></i><span class="ytt_icon_name">fa-file</span></div>
+        </div>
+    </section>
+
+    <!-- Section 2: Regular -->
+    <section class="ytt_section">
+        <div class="ytt_section_head">
+            <span class="ytt_section_num">02</span>
+            <h2 class="ytt_section_title">Regular — 常规</h2>
+            <span class="ytt_section_sub">fa-regular · 400 weight</span>
+        </div>
+        <div class="ytt_icon_grid">
+            <div class="ytt_icon_item"><i class="fa-regular fa-heart"></i><span class="ytt_icon_name">fa-heart</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-star"></i><span class="ytt_icon_name">fa-star</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-envelope"></i><span class="ytt_icon_name">fa-envelope</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-user"></i><span class="ytt_icon_name">fa-user</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-bookmark"></i><span class="ytt_icon_name">fa-bookmark</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-flag"></i><span class="ytt_icon_name">fa-flag</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-file"></i><span class="ytt_icon_name">fa-file</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-folder"></i><span class="ytt_icon_name">fa-folder</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-image"></i><span class="ytt_icon_name">fa-image</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-comment"></i><span class="ytt_icon_name">fa-comment</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-circle-check"></i><span class="ytt_icon_name">fa-circle-check</span></div>
+            <div class="ytt_icon_item"><i class="fa-regular fa-circle-xmark"></i><span class="ytt_icon_name">fa-circle-xmark</span></div>
+        </div>
+    </section>
+
+    <!-- Section 3: Brands -->
+    <section class="ytt_section">
+        <div class="ytt_section_head">
+            <span class="ytt_section_num">03</span>
+            <h2 class="ytt_section_title">Brands — 品牌</h2>
+            <span class="ytt_section_sub">fa-brands · 400 weight</span>
+        </div>
+        <div class="ytt_icon_grid">
+            <div class="ytt_icon_item"><i class="fa-brands fa-github"></i><span class="ytt_icon_name">github</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-weixin"></i><span class="ytt_icon_name">weixin</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-weibo"></i><span class="ytt_icon_name">weibo</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-qq"></i><span class="ytt_icon_name">qq</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-chrome"></i><span class="ytt_icon_name">chrome</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-edge"></i><span class="ytt_icon_name">edge</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-firefox"></i><span class="ytt_icon_name">firefox</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-apple"></i><span class="ytt_icon_name">apple</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-android"></i><span class="ytt_icon_name">android</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-windows"></i><span class="ytt_icon_name">windows</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-html5"></i><span class="ytt_icon_name">html5</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-css3-alt"></i><span class="ytt_icon_name">css3</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-js"></i><span class="ytt_icon_name">js</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-python"></i><span class="ytt_icon_name">python</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-react"></i><span class="ytt_icon_name">react</span></div>
+            <div class="ytt_icon_item"><i class="fa-brands fa-vuejs"></i><span class="ytt_icon_name">vuejs</span></div>
+        </div>
+    </section>
+
+    <!-- Section 4: 尺寸与动画 -->
+    <section class="ytt_section">
+        <div class="ytt_section_head">
+            <span class="ytt_section_num">04</span>
+            <h2 class="ytt_section_title">Scale & Motion</h2>
+            <span class="ytt_section_sub">size utilities · animation</span>
+        </div>
+
+        <div class="ytt_demo_row">
+            <div class="ytt_demo_label">尺寸 — size</div>
+            <div class="ytt_demo_items">
+                <div><i class="fa-solid fa-star fa-xs"></i><span class="ytt_demo_cap">xs</span></div>
+                <div><i class="fa-solid fa-star fa-sm"></i><span class="ytt_demo_cap">sm</span></div>
+                <div><i class="fa-solid fa-star"></i><span class="ytt_demo_cap">默认</span></div>
+                <div><i class="fa-solid fa-star fa-lg"></i><span class="ytt_demo_cap">lg</span></div>
+                <div><i class="fa-solid fa-star fa-2x"></i><span class="ytt_demo_cap">2x</span></div>
+                <div><i class="fa-solid fa-star fa-3x"></i><span class="ytt_demo_cap">3x</span></div>
+                <div><i class="fa-solid fa-star fa-4x"></i><span class="ytt_demo_cap">4x</span></div>
+                <div><i class="fa-solid fa-star fa-5x"></i><span class="ytt_demo_cap">5x</span></div>
+            </div>
+        </div>
+
+        <div class="ytt_demo_row">
+            <div class="ytt_demo_label">动画 — animation</div>
+            <div class="ytt_demo_items">
+                <div><i class="fa-solid fa-spinner fa-3x ytt_spin"></i><span class="ytt_demo_cap">spin</span></div>
+                <div><i class="fa-solid fa-circle-notch fa-3x ytt_spin"></i><span class="ytt_demo_cap">spin</span></div>
+                <div><i class="fa-solid fa-heart fa-3x" style="color:var(--ytt_rose);"></i><span class="ytt_demo_cap">static</span></div>
+                <div><i class="fa-solid fa-bolt fa-3x" style="color:var(--ytt_ink);"></i><span class="ytt_demo_cap">static</span></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="ytt_footer">FONT AWESOME · TYPE SPECIMEN · YTT</footer>
+
+</body>
+</html>
