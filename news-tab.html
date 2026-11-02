@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新闻 Tab 选项卡</title>
+    <!--
+      作者: 杨婷婷
+      建立时间: 2026-11-02
+      使用模型: Trae
+      功能名称: 新闻 Tab 选项卡演示
+      功能简介: 展示一个四分类新闻列表（国内 / 省内 / 国际 / 最热），
+               默认选中"国内新闻"。JS 放在 js/tab-switch.js 外部引用，
+               内部实现"先清除所有选中态 → 再设置当前元素"的切换模式，
+               同一函数对多组 tab 可复用。
+    -->
+    <style>
+        /* ========== Token ========== */
+        :root{
+            --ytt_paper:#f7f5f6;
+            --ytt_ink:#2c2c34;
+            --ytt_active:#b998a4;    /* 与首页 rose 保持家族感 */
+            --ytt_muted:#888b90;
+            --ytt_rule:#e8e0e3;
+            --ytt_card:#ffffff;
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        body{
+            font-family:system-ui,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+            background:var(--ytt_paper);
+            color:var(--ytt_ink);
+            min-height:100vh;
+            padding:48px 20px;
+            max-width:720px;
+            margin:0 auto;
+            line-height:1.7;
+        }
+
+        /* ========== 页面顶部 ========== */
+        .ytt_page_top{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:32px;
+        }
+        .ytt_home_link{
+            color:var(--ytt_muted);
+            text-decoration:none;
+            font-size:13px;
+            border-bottom:1px solid transparent;
+            transition:color .25s, border-color .25s;
+        }
+        .ytt_home_link:hover{color:var(--ytt_active);border-color:var(--ytt_active);}
+        .ytt_sub{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.08em;
+        }
+
+        .ytt_header{margin-bottom:32px;}
+        .ytt_header h1{font-size:28px;font-weight:600;margin-bottom:6px;}
+        .ytt_header p{font-size:14px;color:var(--ytt_muted);}
+
+        /* ========== Tab Bar ========== */
+        .ytt_tab_group{background:var(--ytt_card);border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.04);}
+
+        .ytt_tab_bar{
+            display:flex;
+            border-bottom:1px solid var(--ytt_rule);
+        }
+        .ytt_tab{
+            flex:1;
+            padding:16px 12px;
+            text-align:center;
+            font-size:14px;
+            font-weight:500;
+            color:var(--ytt_muted);
+            cursor:pointer;
+            position:relative;
+            transition:color .25s ease;
+            user-select:none;
+            -webkit-tap-highlight-color:transparent;
+        }
+        /* 激活态：文字变深 + 底部粉色细线 */
+        .ytt_tab.ytt_active{
+            color:var(--ytt_ink);
+            font-weight:600;
+        }
+        .ytt_tab.ytt_active::after{
+            content:"";
+            position:absolute;
+            left:10%;right:10%;
+            bottom:-1px;
+            height:2px;
+            background:var(--ytt_active);
+            border-radius:1px;
+        }
+        .ytt_tab:hover:not(.ytt_active){color:var(--ytt_ink);}
+
+        /* ========== Panel ========== */
+        .ytt_panel_wrap{padding:24px;}
+        .ytt_panel{display:none;}            /* 默认隐藏所有面板 */
+        .ytt_panel.ytt_active_panel{display:block;}  /* 激活才显示 */
+
+        /* ========== 新闻卡片列表 ========== */
+        .ytt_news_list{list-style:none;}
+        .ytt_news_item{
+            padding:16px 0;
+            border-bottom:1px dashed var(--ytt_rule);
+        }
+        .ytt_news_item:last-child{border-bottom:none;}
+        .ytt_news_title{
+            font-size:16px;
+            font-weight:500;
+            margin-bottom:6px;
+            color:var(--ytt_ink);
+            transition:color .2s;
+        }
+        .ytt_news_item:hover .ytt_news_title{color:var(--ytt_active);}
+        .ytt_news_meta{
+            font-size:12px;
+            color:var(--ytt_muted);
+            font-family:"SF Mono",Consolas,monospace;
+            letter-spacing:.04em;
+        }
+        .ytt_news_meta span{margin-right:12px;}
+        .ytt_tag{
+            display:inline-block;
+            font-size:11px;
+            padding:2px 8px;
+            border-radius:3px;
+            background:var(--ytt_active);
+            color:#fff;
+            margin-right:10px;
+            font-family:system-ui,sans-serif;
+        }
+
+        /* ========== 底部说明 ========== */
+        .ytt_foot{
+            margin-top:32px;
+            padding:16px 20px;
+            border:1px solid var(--ytt_rule);
+            border-radius:8px;
+            font-size:12px;
+            color:var(--ytt_muted);
+            background:rgba(255,255,255,.5);
+            font-family:"SF Mono",Consolas,monospace;
+            line-height:1.8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部 -->
+    <div class="ytt_page_top">
+        <a href="index.html" class="ytt_home_link">← 返回首页</a>
+        <span class="ytt_sub">TAB · SWITCH · DEMO</span>
+    </div>
+
+    <header class="ytt_header">
+        <h1>今日新闻</h1>
+        <p>四分类 Tab 选项卡，点击切换查看不同栏目</p>
+    </header>
+
+    <!-- Tab 组（通过 data-tab-group 自动初始化） -->
+    <div class="ytt_tab_group" data-tab-group="news" data-default="0">
+
+        <!-- Tab Bar -->
+        <nav class="ytt_tab_bar">
+            <div class="ytt_tab">国内新闻</div>
+            <div class="ytt_tab">省内新闻</div>
+            <div class="ytt_tab">国际新闻</div>
+            <div class="ytt_tab">最热新闻</div>
+        </nav>
+
+        <!-- Panels -->
+        <div class="ytt_panel_wrap">
+
+            <!-- 国内新闻 -->
+            <div class="ytt_panel">
+                <ul class="ytt_news_list">
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">国家发布新版数字经济发展规划，强调人工智能与实体经济深度融合</div>
+                        <div class="ytt_news_meta"><span>2026-11-02 09:12</span><span>新华社</span><span class="ytt_tag">头条</span></div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">长江经济带绿色航运试点启动，首批十条航线正式上线</div>
+                        <div class="ytt_news_meta"><span>2026-11-02 08:35</span><span>人民日报</span></div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">全国高铁网再增 200 公里，县域覆盖率突破 85%</div>
+                        <div class="ytt_news_meta"><span>2026-11-01 22:10</span><span>央视新闻</span></div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 省内新闻 -->
+            <div class="ytt_panel">
+                <ul class="ytt_news_list">
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">云南省 2026 年秋季学期中小学教学质量评估结果公布</div>
+                        <div class="ytt_news_meta"><span>2026-11-02 08:00</span><span>云南日报</span><span class="ytt_tag">教育</span></div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">昆明长水机场年旅客吞吐量首次突破 6000 万人次</div>
+                        <div class="ytt_news_meta"><span>2026-11-01 18:42</span><span>春城晚报</span></div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">保山至腾冲高速改扩建项目开工，预计 2028 年通车</div>
+                        <div class="ytt_news_meta"><span>2026-11-01 14:05</span><span>保山日报</span></div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 国际新闻 -->
+            <div class="ytt_panel">
+                <ul class="ytt_news_list">
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">COP33 气候大会达成新框架，发达国家承诺加倍气候融资</div>
+                        <div class="ytt_news_meta"><span>2026-11-02 06:30</span><span>Reuters</span><span class="ytt_tag">头条</span></div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">SpaceX 星舰第 15 次试飞成功回收一级和二级助推器</div>
+                        <div class="ytt_news_meta"><span>2026-11-01 23:15</span><span>AP</span></div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">联合国粮农组织发布 2026 年度全球粮食安全报告</div>
+                        <div class="ytt_news_meta"><span>2026-11-01 17:50</span><span>UN FAO</span></div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 最热新闻 -->
+            <div class="ytt_panel">
+                <ul class="ytt_news_list">
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">新版 iPhone 发布后首周销量破纪录，中国市场贡献最大份额</div>
+                        <div class="ytt_news_meta"><span>2026-11-02 07:20</span><span>科技日报</span><span class="ytt_tag">热 999w+</span></div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">国产大飞机 C919 完成首次跨洋商业飞行</div>
+                        <div class="ytt_news_meta"><span>2026-11-02 05:58</span><span>新华社</span><span class="ytt_tag">热 888w+</span></div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_title">世界人工智能大会开幕，百模大战上演</div>
+                        <div class="ytt_news_meta"><span>2026-11-01 21:30</span><span>经济观察报</span><span class="ytt_tag">热 777w+</span></div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 底部实现说明 -->
+    <div class="ytt_foot">
+        实现：事件监听 + 清除全部选中态 + 设置当前选中态<br>
+        JS 文件：js/tab-switch.js（可复用，支持多组 Tab）<br>
+        默认激活：国内新闻（data-default="0"）
+    </div>
+
+    <!-- 外部引用 Tab 切换脚本 -->
+    <script src="js/tab-switch.js"></script>
+</body>
+</html>

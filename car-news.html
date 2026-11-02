@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汽车导购 Tab 切换</title>
+    <!--
+      作者: 杨婷婷
+      建立时间: 2026-11-02
+      使用模型: Trae
+      功能名称: 汽车导购分类 Tab 切换
+      功能简介: 展示汽车导购类网站的分类导航效果，五个分类 Tab
+               （导购 / 3-9万 / 9-17万 / 17-42万 / SUV），
+               切换时显示对应栏目下的购车新闻列表。
+               JS 复用 js/tab-switch.js（事件监听 + 清除全部选中态 + 设置当前选中态）。
+    -->
+    <style>
+        /* ========== Token ========== */
+        :root{
+            --ytt_paper:#f4f4f6;
+            --ytt_ink:#22222a;
+            --ytt_blue:#1a6fdc;      /* 参考图用蓝色选中条，这次换蓝色 */
+            --ytt_blue-soft:#eaf1fb;
+            --ytt_muted:#8a8d93;
+            --ytt_rule:#e6e7eb;
+            --ytt_card:#ffffff;
+            --ytt_tag-bg:#fff5e6;
+            --ytt_tag-color:#c97c00;
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        body{
+            font-family:system-ui,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+            background:var(--ytt_paper);
+            color:var(--ytt_ink);
+            min-height:100vh;
+            padding:0;
+        }
+
+        .ytt_page_top{
+            max-width:720px;
+            margin:24px auto 0;
+            padding:0 16px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+        .ytt_home_link{
+            color:var(--ytt_muted);
+            text-decoration:none;
+            font-size:13px;
+            border-bottom:1px solid transparent;
+            transition:color .25s, border-color .25s;
+        }
+        .ytt_home_link:hover{color:var(--ytt_blue);border-color:var(--ytt_blue);}
+        .ytt_sub{
+            font-family:"SF Mono",Consolas,monospace;
+            font-size:11px;
+            color:var(--ytt_muted);
+            letter-spacing:.08em;
+        }
+
+        /* ========== 主容器 ========== */
+        .ytt_wrap{
+            max-width:720px;
+            margin:24px auto 48px;
+            background:var(--ytt_card);
+            border-radius:6px;
+            box-shadow:0 1px 4px rgba(0,0,0,.06);
+            overflow:hidden;
+        }
+
+        /* ========== Tab Bar ========== */
+        .ytt_tab_bar{
+            display:flex;
+            border-bottom:1px solid var(--ytt_rule);
+            background:#fafbfc;
+        }
+        .ytt_tab{
+            flex:1;
+            padding:16px 8px 14px;
+            text-align:center;
+            font-size:14px;
+            color:var(--ytt_ink);
+            cursor:pointer;
+            position:relative;
+            transition:color .2s ease, background .2s ease;
+            user-select:none;
+            -webkit-tap-highlight-color:transparent;
+            font-weight:500;
+        }
+        .ytt_tab + .ytt_tab{border-left:1px solid var(--ytt_rule);}
+        .ytt_tab:first-child{border-left:none;}
+
+        /* 激活态 */
+        .ytt_tab.ytt_active{
+            color:var(--ytt_blue);
+            background:#fff;
+            font-weight:600;
+        }
+        .ytt_tab.ytt_active::after{
+            content:"";
+            position:absolute;
+            left:20%;right:20%;
+            bottom:0;
+            height:3px;
+            background:var(--ytt_blue);
+            border-radius:3px 3px 0 0;
+        }
+        .ytt_tab:hover:not(.ytt_active){background:rgba(0,0,0,.02);}
+
+        /* ========== Panel ========== */
+        .ytt_panel_wrap{padding:8px 0;}
+        .ytt_panel{display:none;}
+        .ytt_panel.ytt_active_panel{display:block;}
+
+        /* ========== 新闻列表 ========== */
+        .ytt_news_list{list-style:none;}
+        .ytt_news_item{
+            padding:14px 24px;
+            border-bottom:1px solid var(--ytt_rule);
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:16px;
+            transition:background .15s;
+        }
+        .ytt_news_item:last-child{border-bottom:none;}
+        .ytt_news_item:hover{background:#f9fafb;}
+
+        .ytt_news_left{flex:1;min-width:0;}
+        .ytt_news_title{
+            font-size:14px;
+            line-height:1.6;
+            color:var(--ytt_ink);
+            cursor:pointer;
+            transition:color .15s;
+            display:-webkit-box;
+            -webkit-line-clamp:2;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+        }
+        .ytt_news_title:hover{color:var(--ytt_blue);}
+
+        .ytt_news_right{
+            font-size:12px;
+            color:var(--ytt_muted);
+            font-family:"SF Mono",Consolas,monospace;
+            white-space:nowrap;
+            padding-top:3px;
+        }
+
+        .ytt_tag{
+            display:inline-block;
+            font-size:11px;
+            padding:1px 6px;
+            border-radius:2px;
+            background:var(--ytt_tag-bg);
+            color:var(--ytt_tag-color);
+            margin-right:6px;
+            font-family:system-ui,sans-serif;
+            font-weight:500;
+        }
+
+        /* ========== 底部实现说明 ========== */
+        .ytt_foot{
+            max-width:720px;
+            margin:0 auto;
+            padding:16px 20px;
+            font-size:12px;
+            color:var(--ytt_muted);
+            font-family:"SF Mono",Consolas,monospace;
+            line-height:1.8;
+        }
+        .ytt_foot code{
+            background:rgba(26,111,220,.08);
+            color:var(--ytt_blue);
+            padding:1px 6px;
+            border-radius:3px;
+            font-family:"SF Mono",Consolas,monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <div class="ytt_page_top">
+        <a href="index.html" class="ytt_home_link">← 返回首页</a>
+        <span class="ytt_sub">CAR · GUIDE · TABS</span>
+    </div>
+
+    <!-- 主容器（通过 data-tab-group 自动初始化） -->
+    <div class="ytt_wrap ytt_tab_group" data-tab-group="car" data-default="0">
+
+        <!-- 5 个分类 Tab -->
+        <nav class="ytt_tab_bar">
+            <div class="ytt_tab">导购</div>
+            <div class="ytt_tab">3-9万</div>
+            <div class="ytt_tab">9-17万</div>
+            <div class="ytt_tab">17-42万</div>
+            <div class="ytt_tab">SUV</div>
+        </nav>
+
+        <!-- Panels -->
+        <div class="ytt_panel_wrap">
+
+            <!-- ========== 导购 ========== -->
+            <div class="ytt_panel">
+                <ul class="ytt_news_list">
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title"><span class="ytt_tag">导购</span>B级品质满足A级需求 路盛E70亮点详解析</div></div>
+                        <div class="ytt_news_right">12/21</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">购车必看 凯迪拉克XTS领先型28T深度体验</div></div>
+                        <div class="ytt_news_right">12/20</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">爸爸去哪？亲子出游适合车型和注意事项</div></div>
+                        <div class="ytt_news_right">12/20</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">推荐：X1等城市四驱Style+经济省油SUV</div></div>
+                        <div class="ytt_news_right">12/19</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">全景天窗/保养便利 30万齐办齐四驱SUV推荐</div></div>
+                        <div class="ytt_news_right">12/19</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">全民摇号时代:六款低价占号必备车型推荐</div></div>
+                        <div class="ytt_news_right">12/19</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">最高降幅20万！奥迪Q5等年底特惠SUV盘点</div></div>
+                        <div class="ytt_news_right">12/18</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- ========== 3-9万 ========== -->
+            <div class="ytt_panel">
+                <ul class="ytt_news_list">
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title"><span class="ytt_tag">低价</span>最低仅4.6万元起 超低价SUV购买价值点评</div></div>
+                        <div class="ytt_news_right">12/21</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">全民摇号时代:六款低价占号必备车型推荐</div></div>
+                        <div class="ytt_news_right">12/19</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">凌派/观致3等 2013全新家用车年度盘点</div></div>
+                        <div class="ytt_news_right">12/11</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">坚持高配路线！静态评测华泰路盛E70</div></div>
+                        <div class="ytt_news_right">12/09</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">买车先看销量 10月份销量前十名轿车盘点</div></div>
+                        <div class="ytt_news_right">11/29</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">抄底正当时 车展后清仓优惠老款车型推荐</div></div>
+                        <div class="ytt_news_right">11/28</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">土豪气质 细数车展那些低价车上的"神器"</div></div>
+                        <div class="ytt_news_right">11/27</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- ========== 9-17万 ========== -->
+            <div class="ytt_panel">
+                <ul class="ytt_news_list">
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title"><span class="ytt_tag">降价</span>15万级降价车评更值 预算/油耗/空间较量</div></div>
+                        <div class="ytt_news_right">12/21</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">爸爸去哪？亲子出游适合车型和注意事项</div></div>
+                        <div class="ytt_news_right">12/20</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">最高降幅20万！奥迪Q5等年底特惠SUV盘点</div></div>
+                        <div class="ytt_news_right">12/18</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">配置气质得肯定！传祺GA3碰撞试验图解</div></div>
+                        <div class="ytt_news_right">12/18</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">高尔夫7≠两厢版速腾 配置/动力差异解读</div></div>
+                        <div class="ytt_news_right">12/17</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">花小钱也能养SUV 翼博等入门SUV使用手册</div></div>
+                        <div class="ytt_news_right">12/16</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">最高优惠4.3万 十款15万SUV年末购买推荐</div></div>
+                        <div class="ytt_news_right">12/16</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- ========== 17-42万 ========== -->
+            <div class="ytt_panel">
+                <ul class="ytt_news_list">
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title"><span class="ytt_tag">豪华</span>改变品牌的未来 认识豪华品牌最便宜车型</div></div>
+                        <div class="ytt_news_right">12/21</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">推荐：X1等城市四驱Style+经济省油SUV</div></div>
+                        <div class="ytt_news_right">12/19</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">全景天窗/保养便利 30万齐办齐四驱SUV推荐</div></div>
+                        <div class="ytt_news_right">12/18</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">最高降幅20万！奥迪Q5等年底特惠SUV盘点</div></div>
+                        <div class="ytt_news_right">12/18</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">比拼硬实力 8款低配四驱紧凑型SUV性能点评</div></div>
+                        <div class="ytt_news_right">12/18</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">新蒙迪欧/酷帕奇等！盘点2013中级车大变脸</div></div>
+                        <div class="ytt_news_right">12/17</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- ========== SUV ========== -->
+            <div class="ytt_panel">
+                <ul class="ytt_news_list">
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title"><span class="ytt_tag">SUV</span>全景天窗/保养便利 30万齐办齐四驱SUV推荐</div></div>
+                        <div class="ytt_news_right">12/19</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">推荐：X1等城市四驱Style+经济省油SUV</div></div>
+                        <div class="ytt_news_right">12/19</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">最高降幅20万！奥迪Q5等年底特惠SUV盘点</div></div>
+                        <div class="ytt_news_right">12/16</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">比拼硬实力 8款低配四驱紧凑型SUV性能点评</div></div>
+                        <div class="ytt_news_right">12/16</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">花小钱也能养SUV 翼博等入门SUV使用手册</div></div>
+                        <div class="ytt_news_right">12/16</div>
+                    </li>
+                    <li class="ytt_news_item">
+                        <div class="ytt_news_left"><div class="ytt_news_title">最高优惠4.3万 十款15万SUV年末购买推荐</div></div>
+                        <div class="ytt_news_right">12/16</div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 参考图预览 -->
+    <div class="ytt_page_top" style="max-width:720px;margin:8px auto 0;">
+        <a style="font-size:12px;color:var(--ytt_muted);text-decoration:none;">参考图（点击放大）</a>
+    </div>
+    <div style="max-width:720px;margin:8px auto 24px;padding:0 16px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+        <img src="img/car/1.jpg" alt="参考1" style="width:100%;border-radius:4px;cursor:zoom-in;border:1px solid var(--ytt_rule);">
+        <img src="img/car/2.jpg" alt="参考2" style="width:100%;border-radius:4px;cursor:zoom-in;border:1px solid var(--ytt_rule);">
+        <img src="img/car/3.jpg" alt="参考3" style="width:100%;border-radius:4px;cursor:zoom-in;border:1px solid var(--ytt_rule);">
+        <img src="img/car/4.jpg" alt="参考4" style="width:100%;border-radius:4px;cursor:zoom-in;border:1px solid var(--ytt_rule);">
+        <img src="img/car/5.jpg" alt="参考5" style="width:100%;border-radius:4px;cursor:zoom-in;border:1px solid var(--ytt_rule);">
+    </div>
+
+    <!-- 实现说明 -->
+    <div class="ytt_foot">
+        实现：事件监听 <code>addEventListener</code> + 先清除全部选中态 <code>classList.remove</code> + 设置当前选中态 <code>classList.add</code><br>
+        JS 文件：<code>js/tab-switch.js</code>（TabSwitch 组件，已在 news-tab.html 中复用）<br>
+        默认激活：导购（<code>data-default="0"</code>）
+    </div>
+
+    <!-- 外部引用复用的 Tab 切换脚本 -->
+    <script src="js/tab-switch.js"></script>
+</body>
+</html>

@@ -31,6 +31,7 @@ package-lock.json
 .dbg.html
 .probe.html
 .inject.txt
+.trae-html-share-packages/
 
 # 用户临时笔记
 ytt_prompt.md
