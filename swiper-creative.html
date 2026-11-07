@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swiper creative effect 仿写 · 七种出场姿势</title>
+<!--
+  作者: 杨婷婷
+  建立时间: 2026-11-07
+  使用模型: Trae
+  功能名称: Swiper creative effect 仿写演示
+  功能简介: Swiper 官方 6 种 effect 之外隐藏第 7 种——creative
+           它允许你用 transform 自己定义 prev/next slide 的"出场姿势"
+           本页面仿写 7 种 creative 变换（参考 swiper/demo/257-effect-creative.html）
+           配合 nature 图展示，每种效果一个独立的小 Swiper
+-->
+<link rel="stylesheet" href="swiper/swiper-bundle.min.css">
+<script src="swiper/swiper-bundle.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;background:#f4f4f8;color:#1f2937;padding:32px 20px 60px;}
+  .top{max-width:1000px;margin:0 auto 20px;display:flex;justify-content:space-between;align-items:center;}
+  .home{color:#6b7280;text-decoration:none;font-size:13px;}
+  .home:hover{color:#1a6fdc;}
+  .sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#6b7280;letter-spacing:.08em;}
+  .head{max-width:1000px;margin:0 auto 24px;background:linear-gradient(135deg,#0f2b5b,#1d5bbf);border-radius:14px;padding:28px 30px;color:#fff;box-shadow:0 10px 26px rgba(15,43,91,.2);}
+  .head h1{font-size:22px;margin-bottom:8px;letter-spacing:1px;}
+  .head p{font-size:14px;color:#dbe6f8;line-height:1.9;}
+  .head b{color:#ffd166;}
+  .grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px;}
+  .card{background:#fff;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;}
+  .card-head{padding:14px 18px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;}
+  .card-head h2{font-size:14px;font-weight:600;color:#0f2b5b;}
+  .recipe{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#6b7280;background:#f3f4f6;padding:2px 8px;border-radius:4px;}
+  .demo{margin:0 auto;width:280px;height:200px;cursor:grab;}
+  .demo:active{cursor:grabbing;}
+  .demo .swiper-slide{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;border-radius:10px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.25);}
+  .demo .swiper-slide img{width:100%;height:100%;object-fit:cover;border-radius:10px;}
+  .demo h3{font-size:15px;margin-bottom:6px;}
+  .demo small{font-size:11px;opacity:.8;}
+  .desc{padding:12px 18px;font-size:12.5px;color:#6b7280;line-height:1.8;}
+  .c1{background:linear-gradient(135deg,#0f2b5b,#1d5bbf);}
+  .c2{background:linear-gradient(135deg,#991b1b,#dc2626);}
+  .c3{background:linear-gradient(135deg,#064e3b,#059669);}
+  .c4{background:linear-gradient(135deg,#78350f,#d97706);}
+  .c5{background:linear-gradient(135deg,#4c1d95,#7c3aed);}
+  .c6{background:linear-gradient(135deg,#164e63,#0891b2);}
+  .c7{background:linear-gradient(135deg,#3f3f46,#71717a);}
+  .tip{max-width:1000px;margin:24px auto 0;background:#fffbea;border:1px solid #fde68a;border-radius:12px;padding:14px 20px;font-size:13px;color:#7c5e10;line-height:1.9;}
+  .tip b{color:#b45309;}
+</style>
+</head>
+<body>
+<div class="top">
+  <a href="index.html" class="home">← 返回首页</a>
+  <span class="sub">CREATIVE · EFFECT · SWIPER</span>
+</div>
+<div class="head">
+  <h1>任务二 · Swiper creative effect <b style="color:#ffd166;">自己定义出场姿势</b></h1>
+  <p>Swiper 官方 effect 只有 6 种（slide/fade/cube/coverflow/flip/cards），隐藏第 7 种——<b>creative</b>。它让你用 transform 自己写 prev / next slide 怎么出场。下面 7 个框，每一个的 prev 和 next 都配了不同的 transform 组合。</p>
+</div>
+
+<div class="grid">
+
+  <!-- 效果 1：纯 translate -->
+  <div class="card">
+    <div class="card-head"><h2>① 纯侧移 · next 飞出 100%</h2><span class="recipe">translate: [100%,0,0]</span></div>
+    <div class="demo">
+      <div class="swiper" id="yttSwCr1">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-1.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-2.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-3.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-4.jpg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="desc">prev 在原地留阴影，next 从右侧 100% 飞进来。最基础的 creative 配方。</div>
+  </div>
+
+  <!-- 效果 2：双层夹击 -->
+  <div class="card">
+    <div class="card-head"><h2>② 双层夹击 · 左右各 120%</h2><span class="recipe">prev -120%, next 120%</span></div>
+    <div class="demo">
+      <div class="swiper" id="yttSwCr2">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-1.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-2.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-3.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-4.jpg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="desc">prev 向左飞出 -120%，next 向右飞出 +120%，中间叠了两层阴影。</div>
+  </div>
+
+  <!-- 效果 3：微偏移 -->
+  <div class="card">
+    <div class="card-head"><h2>③ 轻推 · prev 只退 -20%</h2><span class="recipe">prev translate -20%</span></div>
+    <div class="demo">
+      <div class="swiper" id="yttSwCr3">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-1.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-2.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-3.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-4.jpg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="desc">prev 只后退 -20%，next 飞进来，层次最温和——企业官网最爱。</div>
+  </div>
+
+  <!-- 效果 4：3D 翻转 -->
+  <div class="card">
+    <div class="card-head"><h2>④ 3D 翻转 · rotateX 180°</h2><span class="recipe">rotate: [180,0,0]</span></div>
+    <div class="demo">
+      <div class="swiper" id="yttSwCr4">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-1.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-2.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-3.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-4.jpg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="desc">prev 和 next 都沿 X 轴翻转 180° 再推远——教科书式 3D。</div>
+  </div>
+
+  <!-- 效果 5：侧边旋入 -->
+  <div class="card">
+    <div class="card-head"><h2>⑤ 侧旋 · rotateZ ±90°</h2><span class="recipe">rotate: [0,0,±90]</span></div>
+    <div class="demo">
+      <div class="swiper" id="yttSwCr5">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-1.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-2.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-3.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-4.jpg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="desc">prev 向左转 -90° 退远，next 向右转 +90° 入镜。</div>
+  </div>
+
+  <!-- 效果 6：origin 变换 -->
+  <div class="card">
+    <div class="card-head"><h2>⑥ 边缘轴旋转 · origin</h2><span class="recipe">origin: left/right center</span></div>
+    <div class="demo">
+      <div class="swiper" id="yttSwCr6">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-1.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-2.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-3.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-4.jpg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="desc">prev 以左边为轴向右旋转，next 以右边为轴向左转——像翻书。</div>
+  </div>
+
+  <!-- 效果 7：我自己配的 -->
+  <div class="card">
+    <div class="card-head"><h2>⑦ 自创配方 · 斜飞 + 缩放</h2><span class="recipe">rotate + translate + scale</span></div>
+    <div class="demo">
+      <div class="swiper" id="yttSwCr7">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-1.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-2.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-3.jpg"></div>
+          <div class="swiper-slide"><img src="swiper/demo/images/nature-4.jpg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="desc">prev 向左下斜飞并缩小，next 从右上斜飞来带旋转——我自己想的配方。</div>
+  </div>
+
+</div>
+
+<div class="tip">
+  <b>💡 creative 配方长这样：</b><br>
+  <code>creativeEffect: { prev: { shadow:true, translate:[x,y,z], rotate:[rx,ry,rz], scale:[a,b] }, next: { ... } }</code><br>
+  prev 定义"当前 slide 离开时变成什么样"，next 定义"新 slide 进来之前在哪里"。想加什么 transform 就加什么——自由度全在你手上。
+</div>
+
+<script>
+/* ===== 效果 1：纯 translate ===== */
+var yttSwCr1 = new Swiper('#yttSwCr1', {
+  grabCursor: true, loop: true,
+  effect: 'creative',
+  creativeEffect: {
+    prev: { shadow: true, translate: [0, 0, -400] },
+    next: { translate: ['100%', 0, 0] }
+  }
+});
+
+/* ===== 效果 2：双层夹击 ===== */
+var yttSwCr2 = new Swiper('#yttSwCr2', {
+  grabCursor: true, loop: true,
+  effect: 'creative',
+  creativeEffect: {
+    prev: { shadow: true, translate: ['-120%', 0, -500] },
+    next: { shadow: true, translate: ['120%', 0, -500] }
+  }
+});
+
+/* ===== 效果 3：微偏移 ===== */
+var yttSwCr3 = new Swiper('#yttSwCr3', {
+  grabCursor: true, loop: true,
+  effect: 'creative',
+  creativeEffect: {
+    prev: { shadow: true, translate: ['-20%', 0, -1] },
+    next: { translate: ['100%', 0, 0] }
+  }
+});
+
+/* ===== 效果 4：3D 翻转 ===== */
+var yttSwCr4 = new Swiper('#yttSwCr4', {
+  grabCursor: true, loop: true,
+  effect: 'creative',
+  creativeEffect: {
+    prev: { shadow: true, translate: [0, 0, -800], rotate: [180, 0, 0] },
+    next: { shadow: true, translate: [0, 0, -800], rotate: [-180, 0, 0] }
+  }
+});
+
+/* ===== 效果 5：侧旋 ===== */
+var yttSwCr5 = new Swiper('#yttSwCr5', {
+  grabCursor: true, loop: true,
+  effect: 'creative',
+  creativeEffect: {
+    prev: { shadow: true, translate: ['-125%', 0, -800], rotate: [0, 0, -90] },
+    next: { shadow: true, translate: ['125%', 0, -800], rotate: [0, 0, 90] }
+  }
+});
+
+/* ===== 效果 6：边缘轴旋转 ===== */
+var yttSwCr6 = new Swiper('#yttSwCr6', {
+  grabCursor: true, loop: true,
+  effect: 'creative',
+  creativeEffect: {
+    prev: { shadow: true, origin: 'left center', translate: ['-5%', 0, -200], rotate: [0, 100, 0] },
+    next: { shadow: true, origin: 'right center', translate: ['5%', 0, -200], rotate: [0, -100, 0] }
+  }
+});
+
+/* ===== 效果 7：自创斜飞配方 =====
+ * 功能: 我自己配的 creative——prev 向左下斜飞并缩小，next 从右上斜飞来带旋转
+ * 参数: 无
+ * 返回: 无
+ */
+var yttSwCr7 = new Swiper('#yttSwCr7', {
+  grabCursor: true, loop: true,
+  effect: 'creative',
+  creativeEffect: {
+    prev: {
+      shadow: true,
+      translate: ['-60%', '30%', -600],
+      rotate: [0, 0, -15],
+      scale: [0.85, 1]
+    },
+    next: {
+      shadow: true,
+      translate: ['80%', '-25%', -300],
+      rotate: [0, 0, 20],
+      scale: [1.1, 1]
+    }
+  }
+});
+</script>
+</body>
+</html>

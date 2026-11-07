@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swiper 提示词工程 · direction vertical 为什么不生效</title>
+<!--
+  作者: 杨婷婷
+  建立时间: 2026-11-07
+  使用模型: Trae
+  功能名称: Swiper 垂直轮播提示词工程对比页
+  功能简介: 左右并排展示同一个需求的两轮 AI 产出
+           第一轮只写 direction:'vertical' 没给容器高度 → 水平滚动
+           第二轮补 height + pagination verticalClass → 真正纵向滚
+           配套展示两轮提示词原文和差异分析
+-->
+<link rel="stylesheet" href="swiper/swiper-bundle.min.css">
+<script src="swiper/swiper-bundle.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;background:#f4f4f8;color:#1f2937;padding:32px 20px 60px;}
+  .top{max-width:960px;margin:0 auto 20px;display:flex;justify-content:space-between;align-items:center;}
+  .home{color:#6b7280;text-decoration:none;font-size:13px;}
+  .home:hover{color:#1a6fdc;}
+  .sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#6b7280;letter-spacing:.08em;}
+  .head{max-width:960px;margin:0 auto 24px;background:linear-gradient(135deg,#0f2b5b,#1d5bbf);border-radius:14px;padding:28px 30px;color:#fff;box-shadow:0 10px 26px rgba(15,43,91,.2);}
+  .head h1{font-size:22px;margin-bottom:8px;letter-spacing:1px;}
+  .head p{font-size:14px;color:#dbe6f8;line-height:1.9;}
+  .compare{max-width:960px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .col{background:#fff;border-radius:14px;padding:20px;border:1px solid #e5e7eb;}
+  .col h2{font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;color:#fff;}
+  .bad{background:#dc2626;} .good{background:#16a34a;}
+  .col p{font-size:13px;color:#6b7280;line-height:1.8;margin-bottom:14px;}
+  /* 关键：vertical 模式必须给 swiper 容器固定高度 */
+  .demo{width:100%;height:320px;border-radius:10px;overflow:hidden;border:2px solid #e5e7eb;}
+  .demo .swiper-slide{position:relative;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;padding:20px;color:#fff;font-size:14px;}
+  .demo .swiper-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,.65));}
+  .demo .swiper-slide > *{position:relative;z-index:1;}
+  .demo h3{font-size:17px;margin-bottom:4px;}
+  .demo small{color:#cbd5e1;font-size:12px;}
+  .code{max-width:960px;margin:24px auto 0;background:#fff;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;}
+  .code-head{padding:12px 18px;background:#f8fafc;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;}
+  .code-body{background:#1e293b;color:#e2e8f0;padding:18px 20px;font-family:"SF Mono",Consolas,monospace;font-size:13px;line-height:1.8;overflow-x:auto;white-space:pre;}
+  .analysis{max-width:960px;margin:20px auto 0;background:#fff;border-radius:14px;border:1px solid #e5e7eb;padding:24px 28px;}
+  .analysis h2{font-size:16px;margin-bottom:14px;color:#0f2b5b;}
+  .analysis li{font-size:14px;line-height:2;margin-bottom:6px;padding-left:18px;position:relative;list-style:none;}
+  .analysis li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:#1a6fdc;}
+  .prompts{max-width:960px;margin:20px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .prompt{background:#fff;border-radius:14px;border:1px solid #e5e7eb;padding:20px;}
+  .prompt h3{font-size:14px;margin-bottom:10px;}
+  .prompt-body{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:14px;font-size:13px;line-height:1.9;color:#374151;}
+  .prompt ul{margin-top:10px;padding-left:18px;font-size:13px;color:#6b7280;}
+  .prompt li{margin-bottom:4px;}
+  @media(max-width:720px){.compare,.prompts{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="top">
+  <a href="index.html" class="home">← 返回首页</a>
+  <span class="sub">PROMPT · ENGINEERING · SWIPER</span>
+</div>
+<div class="head">
+  <h1>任务一 · Swiper 提示词工程 <b style="color:#ffd166;">direction: vertical 为什么不生效</b></h1>
+  <p>两轮 AI 产出并排对比。<b>左边第一轮只写了 direction:'vertical' — 没给容器高度，垂直模式找不到参照。</b>右边第二轮补了 CSS height + pagination verticalClass — 终于可以上下拖了。</p>
+</div>
+
+<div class="compare">
+  <div class="col">
+    <h2><span class="badge bad">第一轮 · ❌ 错</span> AI 第一次写的</h2>
+    <p>AI 只配了 direction:'vertical'，但 <b>没给 swiper 设 height</b>，垂直模式找不到参照。</p>
+    <div class="demo">
+      <div class="swiper" id="yttSwBad">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide" style="background-image:url('swiper/demo/images/nature-1.jpg')"><h3>Slide 1</h3><small>应该纵向滚，但……</small></div>
+          <div class="swiper-slide" style="background-image:url('swiper/demo/images/nature-2.jpg')"><h3>Slide 2</h3><small>看起来还是水平的？</small></div>
+          <div class="swiper-slide" style="background-image:url('swiper/demo/images/nature-3.jpg')"><h3>Slide 3</h3><small>父容器没有高度</small></div>
+        </div>
+        <div class="swiper-pagination" id="yttPagBad"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <h2><span class="badge good">第二轮 · ✅ 对</span> 修完以后</h2>
+    <p>给 swiper 容器加了 <b>height:320px</b>（CSS），并把 pagination 换成 vertical 类型。</p>
+    <div class="demo">
+      <div class="swiper" id="yttSwGood">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide" style="background-image:url('swiper/demo/images/nature-1.jpg')"><h3>Slide 1</h3><small>现在上下滚！</small></div>
+          <div class="swiper-slide" style="background-image:url('swiper/demo/images/nature-2.jpg')"><h3>Slide 2</h3><small>拖动试试</small></div>
+          <div class="swiper-slide" style="background-image:url('swiper/demo/images/nature-3.jpg')"><h3>Slide 3</h3><small>竖版轮播</small></div>
+        </div>
+        <div class="swiper-pagination" id="yttPagGood"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="code">
+  <div class="code-head">JS 初始化代码对比</div>
+<pre class="code-body"><span style="color:#fca5a5;">// ❌ 第一轮（只配了方向）——没用</span>
+<span style="color:#93c5fd;">var</span> yttSwBad = <span style="color:#93c5fd;">new</span> Swiper(<span style="color:#fde68a;">'#yttSwBad'</span>, {
+  direction: <span style="color:#fde68a;">'vertical'</span>,   <span style="color:#fca5a5;">// 方向写了，但容器没高度</span>
+  pagination: { el: <span style="color:#fde68a;">'#yttPagBad'</span>, clickable: <span style="color:#93c5fd;">true</span> }
+});
+
+<span style="color:#86efac;">// ✅ 第二轮（容器有高度 + pagination 也垂直）——生效了</span>
+<span style="color:#93c5fd;">var</span> yttSwGood = <span style="color:#93c5fd;">new</span> Swiper(<span style="color:#fde68a;">'#yttSwGood'</span>, {
+  direction: <span style="color:#fde68a;">'vertical'</span>,
+  pagination: {
+    el: <span style="color:#fde68a;">'#yttPagGood'</span>,
+    clickable: <span style="color:#93c5fd;">true</span>,
+    verticalClass: <span style="color:#93c5fd;">true</span>   <span style="color:#86efac;">// 小圆点也竖排</span>
+  }
+});
+
+<span style="color:#86efac;">/* CSS 关键（必须有） */</span>
+.demo { height: 320px; }   <span style="color:#86efac;">// 给 swiper 容器一个固定高度</span>
+.demo .swiper-slide { height: 100%; }</pre>
+</div>
+
+<div class="prompts">
+  <div class="prompt">
+    <h3><span class="badge bad" style="font-size:11px;">第一轮提示词</span></h3>
+    <div class="prompt-body">"帮我创建一个 Swiper 轮播，<b>方向是 vertical</b>，有分页器，三张图就好。"</div>
+    <ul>
+      <li>❌ 没说容器高度 → AI 默认 100%</li>
+      <li>❌ 没说需要 CSS → AI 只写了 JS</li>
+      <li>❌ 没说 pagination 也要 vertical</li>
+    </ul>
+  </div>
+  <div class="prompt">
+    <h3><span class="badge good" style="font-size:11px;">第二轮提示词</span></h3>
+    <div class="prompt-body">"请创建一个 <b>320px 高</b> 的 Swiper 垂直轮播（direction:'vertical'），slide 高度占满容器。pagination 圆点也要<b>竖排显示</b>（verticalClass:true）。三张 nature 图，背景图模式，底部加标题和小副标题。给 swiper 容器加一个 <b>320px 固定高度的 CSS 类</b>。"</div>
+    <ul>
+      <li>✅ 指定了容器高度</li>
+      <li>✅ 指定了 slide 占满</li>
+      <li>✅ 指定了 pagination 也垂直</li>
+      <li>✅ 给出了 CSS 要求</li>
+    </ul>
+  </div>
+</div>
+
+<div class="analysis">
+  <h2>🧠 踩坑学到的 5 点</h2>
+  <ul>
+    <li><b>vertical 模式必须有高度参照</b>：Swiper 不知道"上下"在哪里——父容器 height 必须明确。</li>
+    <li><b>提示词要写完整约束</b>："direction:vertical" 只告诉了 Swiper 怎么滚，没告诉 CSS 容器多高、slide 多高。AI 只能猜。</li>
+    <li><b>pagination 和 direction 要配对</b>：轮播竖排、分页器还横排视觉会打架。加 verticalClass:true。</li>
+    <li><b>先验知识很重要</b>：Swiper 官方文档写了"vertical 模式需要容器高度"——但 AI 不会自动读，得你带上。</li>
+    <li><b>验证是最好的老师</b>：拖一下发现它不滚，立刻就知道方向写了但高度没给。</li>
+  </ul>
+</div>
+
+<script>
+/* ===== yttSwBad =====
+ * 功能: 演示"只写 direction 不写容器高度"的错误版本（水平模式不生效）
+ * 参数: 无
+ * 返回: 无
+ */
+var yttSwBad = new Swiper('#yttSwBad', {
+  direction: 'vertical',
+  pagination: { el: '#yttPagBad', clickable: true }
+});
+
+/* ===== yttSwGood =====
+ * 功能: 演示"容器有固定高度 + slide 占满 + pagination 也垂直"的正确版本
+ * 参数: 无
+ * 返回: 无
+ */
+var yttSwGood = new Swiper('#yttSwGood', {
+  direction: 'vertical',
+  pagination: { el: '#yttPagGood', clickable: true, verticalClass: true }
+});
+</script>
+</body>
+</html>
