@@ -21,16 +21,16 @@
 <script src="swiper/swiper-bundle.min.js"></script>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{height:100%;}
+  html,body{position:relative;height:100%;}
   body{font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;background:#000;color:#fff;min-height:100vh;}
   .top{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:linear-gradient(180deg,rgba(0,0,0,.6),transparent);}
   .home{color:#cbd5e1;text-decoration:none;font-size:13px;background:rgba(255,255,255,.12);padding:5px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);transition:background .2s;color:#fff;}
   .home:hover{background:rgba(255,255,255,.25);}
   .title{font-size:14px;color:#e2e8f0;font-weight:600;letter-spacing:1px;}
 
-  /* Swiper 全高 */
-  .ytt-swiper{width:100%;height:100vh;background:#000;--swiper-navigation-color:#fff;--swiper-pagination-color:#ffd166;}
-  .ytt-swiper .swiper-slide{position:relative;overflow:hidden;}
+  /* Swiper 全高（参考官方 360-parallax.html） */
+  .swiper{width:100%;height:100%;background:#000;--swiper-navigation-color:#fff;--swiper-pagination-color:#ffd166;}
+  .swiper .swiper-slide{position:relative;overflow:hidden;}
 
   /* parallax 背景层 */
   .parallax-bg{position:absolute;left:0;top:0;width:130%;height:100%;background-size:cover;background-position:center;}
@@ -52,14 +52,14 @@
   .hint kbd{background:rgba(255,255,255,.2);padding:1px 6px;border-radius:3px;font-size:11px;margin:0 3px;}
 
   /* 分页器美化 */
-  .ytt-swiper .swiper-pagination-bullet{width:28px;height:3px;border-radius:3px;background:rgba(255,255,255,.35);opacity:1;}
-  .ytt-swiper .swiper-pagination-bullet-active{background:#ffd166;width:36px;border-radius:3px;}
+  .swiper .swiper-pagination-bullet{width:28px;height:3px;border-radius:3px;background:rgba(255,255,255,.35);opacity:1;}
+  .swiper .swiper-pagination-bullet-active{background:#ffd166;width:36px;border-radius:3px;}
 
   /* 导航按钮 */
-  .ytt-swiper .swiper-button-next,
-  .ytt-swiper .swiper-button-prev{width:48px;height:48px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border-radius:50%;border:1px solid rgba(255,255,255,.25);transition:background .25s;}
-  .ytt-swiper .swiper-button-next:hover,
-  .ytt-swiper .swiper-button-prev:hover{background:rgba(255,255,255,.25);}
+  .swiper .swiper-button-next,
+  .swiper .swiper-button-prev{width:48px;height:48px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border-radius:50%;border:1px solid rgba(255,255,255,.25);transition:background .25s;}
+  .swiper .swiper-button-next:hover,
+  .swiper .swiper-button-prev:hover{background:rgba(255,255,255,.25);}
 
   @media(max-width:640px){
     .title-big{font-size:32px;letter-spacing:1px;}
@@ -75,8 +75,7 @@
   <div class="title">光影展 · 综合创作</div>
 </div>
 
-<div class="ytt-swiper">
-  <div class="swiper ytt-main-swiper">
+<div class="swiper">
     <div class="swiper-wrapper">
 
       <!-- Slide 1 -->
@@ -204,7 +203,6 @@
     <div class="swiper-button-next"></div>
     <div class="swiper-button-prev"></div>
     <div class="swiper-pagination"></div>
-  </div>
 </div>
 
 <div class="hint">
@@ -225,7 +223,7 @@
  *   keyboard       → swiper/demo/260-keyboard-control.html
  *   navigation     → swiper/demo/020-navigation.html
  */
-var ytt_mainSwiper = new Swiper('.ytt-main-swiper', {
+var ytt_mainSwiper = new Swiper('.swiper', {
   loop: true,
   speed: 700,
   /* ===== 核心三大能力 ===== */
