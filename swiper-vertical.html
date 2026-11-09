@@ -55,13 +55,16 @@
   /* ===== 让 Swiper 真的能显示图片 ===== */
   .demo .swiper{height:100%;}
   .demo .swiper-slide{height:100%;}
-  /* 第一轮（真实错误效果）：不初始化 Swiper，slide 按普通 div 堆叠 */
-  .demo-noheight{background:#fef3f2;border-color:#fca5a5;}
-  .demo-noheight .ytt-bad-slide{padding:14px 16px;border-bottom:1px dashed #fecaca;font-size:13px;background:#fff;}
-  .demo-noheight .ytt-bad-slide:last-child{border-bottom:none;}
-  .demo-noheight .ytt-bad-slide h3{color:#b91c1c;font-size:14px;margin-bottom:2px;}
-  .demo-noheight .ytt-bad-slide small{color:#dc2626;font-size:11px;}
-  .demo-noheight .ytt-bad-note{padding:10px 14px;background:#fee2e2;color:#991b1b;font-size:12px;border-top:2px solid #fca5a5;}
+  /* 第一轮（真实错误效果）：AI 漏了给 swiper 容器写 height，
+     Swiper 就沿用了默认的 auto 高度 → wrapper 塌到只剩一点点 → 图片被严重裁掉，根本看不清是什么 */
+  .demo-noheight{background:#fff;border:2px dashed #dc2626;}
+  .demo-noheight .swiper{height:80px !important;}     /* ← 故意给一个很小的高度，模拟"没写 height 的后果" */
+  .demo-noheight .swiper-slide{height:80px !important;}
+  .demo-noheight::before{
+    content:"❌ AI 漏写了 height，容器默认只这么高";
+    position:absolute;top:-22px;left:0;font-size:11px;color:#dc2626;background:#fef3f2;padding:2px 8px;border-radius:4px;
+  }
+  .demo-noheight{position:relative;}
   /* ===== ytt_prompt 入口（和首页风格一致） ===== */
   .prompt-entry{max-width:960px;margin:24px auto 0;background:linear-gradient(135deg,#f0f4ff,#fff);border:1px solid #c7d2fe;border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:16px;text-decoration:none;color:#1f2937;transition:transform .2s, box-shadow .2s;}
   .prompt-entry:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(30,64,175,.12);}
@@ -88,10 +91,14 @@
     <h2><span class="badge bad">第一轮 · ❌ 错</span> AI 第一次写的</h2>
     <p>AI 只配了 direction:'vertical'，但 <b>没给 swiper 设 height</b>，垂直模式找不到参照。</p>
     <div class="demo demo-noheight">
-      <div class="ytt-bad-slide"><h3>❌ Slide 1</h3><small>想纵向滚，但……</small></div>
-      <div class="ytt-bad-slide"><h3>❌ Slide 2</h3><small>看起来还是竖着堆叠</small></div>
-      <div class="ytt-bad-slide"><h3>❌ Slide 3</h3><small>根本没被轮播接管</small></div>
-      <div class="ytt-bad-note">⚠ AI 漏了 2 件事：①没给 swiper 容器写 height（CSS），② pagination 没加 verticalClass:true。结果就是——HTML 结构在那儿，但 Swiper 初始化后 wrapper 高度 = 0，所有 slide 被 absolute 定位叠在一起看不见，或者直接像这样按文档流堆叠。</div>
+      <div class="swiper" id="yttSwBad">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide" style="background-image:url('swiper/demo/images/nature-1.jpg')"><h3>Slide 1</h3><small>看不清是什么……</small></div>
+          <div class="swiper-slide" style="background-image:url('swiper/demo/images/nature-2.jpg')"><h3>Slide 2</h3><small>图片被严重裁掉</small></div>
+          <div class="swiper-slide" style="background-image:url('swiper/demo/images/nature-3.jpg')"><h3>Slide 3</h3><small>根本没法纵向滚</small></div>
+        </div>
+        <div class="swiper-pagination" id="yttPagBad"></div>
+      </div>
     </div>
   </div>
   <div class="col">
@@ -179,6 +186,17 @@
 </div>
 
 <script>
+/* ===== yttSwBad =====
+ * 功能: 演示"AI 第一次写的错版本"——只有 direction:'vertical'，没给正确高度
+ * 参数: 无
+ * 返回: 无
+ * 效果: 容器被裁到只有 80px 高 → nature 图被严重裁掉，看不清是什么
+ */
+var yttSwBad = new Swiper('#yttSwBad', {
+  direction: 'vertical',
+  pagination: { el: '#yttPagBad', clickable: true }   // ← 故意没加 verticalClass
+});
+
 /* ===== yttSwGood =====
  * 功能: 演示"容器有固定高度 + slide 占满 + pagination 也垂直"的正确版本
  * 参数: 无
@@ -188,8 +206,6 @@ var yttSwGood = new Swiper('#yttSwGood', {
   direction: 'vertical',
   pagination: { el: '#yttPagGood', clickable: true, verticalClass: true }
 });
-/* 第一轮（❌ 错）不初始化 Swiper — 让 slide 按普通 div 堆叠显示，
-   这就是"AI 没给容器写 height"时页面的真实样子 */
 </script>
 </body>
 </html>
