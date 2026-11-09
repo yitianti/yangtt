@@ -79,3 +79,31 @@ AGENTS.md 所有说明、检查条目统一简体中文；文件路径、HTML、
 **提示词**：
 
 代码要按照之前设定放入规则：所有 CSS 类名、id、JS 变量必须以ytt 开头(你姓名首字母_ ）,github的仓库要包含我的姓名全拼，提交项目并page发布，js要使用外部引用
+
+---
+
+**时间**：2026-11-09  
+**模型**：Trae  
+**提示词**：
+
+### 任务一 · Swiper 提示词工程 direction:vertical 为什么不生效
+
+#### 第一轮提示词（❌ 有缺陷）
+帮我创建一个 Swiper 轮播，方向是 vertical，有分页器，三张图就好。
+
+#### 第二轮提示词（✅ 补全约束）
+请创建一个 320px 高 的 Swiper 垂直轮播（direction:'vertical'），slide 高度占满容器。pagination 圆点也要竖排显示（verticalClass:true）。三张 nature 图，背景图模式，底部加标题和小副标题。给 swiper 容器加一个 320px 固定高度的 CSS 类。
+
+#### 缺陷分析
+第一轮漏掉三个约束：①容器高度没说（Swiper vertical 模式必须有 height 参照，否则 wrapper 高度 = 0）；②pagination 没说也要 vertical（视觉会和轮播方向打架）；③没提要写 CSS（AI 只写了 JS，容器还是 auto 高度）。
+
+#### 对应文件
+swiper-vertical.html — 左右并排对比两轮产出，同样的 nature 图，只差 CSS height 和 verticalClass:true
+
+---
+
+**时间**：2026-11-09  
+**模型**：Trae  
+**提示词**：
+
+帮我修复 swiper-vertical.html 图片不显示的问题，并将提示词放到图片上方左右并排形成视觉对比，同时追加到 ytt_prompt.md

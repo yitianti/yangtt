@@ -85,6 +85,28 @@
   <h1>任务一 · Swiper 提示词工程 <b style="color:#ffd166;">direction: vertical 为什么不生效</b></h1>
   <p>两轮 AI 产出并排对比。<b>左边第一轮只写了 direction:'vertical' — 没给容器高度，垂直模式找不到参照。</b>右边第二轮补了 CSS height + pagination verticalClass — 终于可以上下拖了。</p>
 </div>
+<!-- 提示词卡片（在图片上方，左右并排和下方 demo 对齐形成视觉对比） -->
+<div class="prompts">
+  <div class="prompt">
+    <h3><span class="badge bad" style="font-size:11px;">第一轮提示词</span></h3>
+    <div class="prompt-body">"帮我创建一个 Swiper 轮播，<b>方向是 vertical</b>，有分页器，三张图就好。"</div>
+    <ul>
+      <li>❌ 没说容器高度 → AI 默认 auto</li>
+      <li>❌ 没说需要 CSS → AI 只写了 JS</li>
+      <li>❌ 没说 pagination 也要 vertical</li>
+    </ul>
+  </div>
+  <div class="prompt">
+    <h3><span class="badge good" style="font-size:11px;">第二轮提示词</span></h3>
+    <div class="prompt-body">"请创建一个 <b>320px 高</b> 的 Swiper 垂直轮播（direction:'vertical'），slide 高度占满容器。pagination 圆点也要<b>竖排显示</b>（verticalClass:true）。三张 nature 图，背景图模式，底部加标题和小副标题。给 swiper 容器加一个 <b>320px 固定高度的 CSS 类</b>。"</div>
+    <ul>
+      <li>✅ 指定了容器高度</li>
+      <li>✅ 指定了 slide 占满</li>
+      <li>✅ 指定了 pagination 也垂直</li>
+      <li>✅ 给出了 CSS 要求</li>
+    </ul>
+  </div>
+</div>
 
 <div class="compare">
   <div class="col">
@@ -138,28 +160,6 @@
 <span style="color:#86efac;">/* CSS 关键（必须有） */</span>
 .demo { height: 320px; }   <span style="color:#86efac;">// 给 swiper 容器一个固定高度</span>
 .demo .swiper-slide { height: 100%; }</pre>
-</div>
-
-<div class="prompts">
-  <div class="prompt">
-    <h3><span class="badge bad" style="font-size:11px;">第一轮提示词</span></h3>
-    <div class="prompt-body">"帮我创建一个 Swiper 轮播，<b>方向是 vertical</b>，有分页器，三张图就好。"</div>
-    <ul>
-      <li>❌ 没说容器高度 → AI 默认 100%</li>
-      <li>❌ 没说需要 CSS → AI 只写了 JS</li>
-      <li>❌ 没说 pagination 也要 vertical</li>
-    </ul>
-  </div>
-  <div class="prompt">
-    <h3><span class="badge good" style="font-size:11px;">第二轮提示词</span></h3>
-    <div class="prompt-body">"请创建一个 <b>320px 高</b> 的 Swiper 垂直轮播（direction:'vertical'），slide 高度占满容器。pagination 圆点也要<b>竖排显示</b>（verticalClass:true）。三张 nature 图，背景图模式，底部加标题和小副标题。给 swiper 容器加一个 <b>320px 固定高度的 CSS 类</b>。"</div>
-    <ul>
-      <li>✅ 指定了容器高度</li>
-      <li>✅ 指定了 slide 占满</li>
-      <li>✅ 指定了 pagination 也垂直</li>
-      <li>✅ 给出了 CSS 要求</li>
-    </ul>
-  </div>
 </div>
 
 <!-- AI 协作记录入口（和首页风格一致） -->
