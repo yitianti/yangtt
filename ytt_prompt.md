@@ -107,3 +107,16 @@ swiper-vertical.html — 左右并排对比两轮产出，同样的 nature 图�
 **提示词**：
 
 帮我修复 swiper-vertical.html 图片不显示的问题，并将提示词放到图片上方左右并排形成视觉对比，同时追加到 ytt_prompt.md
+
+---
+
+**时间**：2026-11-12  
+**模型**：Trae  
+**提示词**：
+
+给我新建一个 html 文件，显示上图下文的结构，图片和文字通过本地启动服务器获取当前文件夹下面的db里面db.json的poems里面的图片，title和content。并给我生成server.js数据服务器文件，server.js放在db文件夹中。其中端口号为3004。
+
+#### 实现
+- db/server.js — Node.js http 模块，端口 3004，GET /api/poems 返回 poems 数组，支持 CORS
+- poem-list.html — 上图下文卡片网格，fetch 本地服务器，CSS 类名/id 以 ytt_ 开头
+- db.json 原有 4 条 poems 数据（title + content + pic 远程图 URL）
