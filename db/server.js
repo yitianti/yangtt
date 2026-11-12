@@ -17,7 +17,7 @@ const http = require('http');          // Node.js 内置 HTTP 模块
 const fs = require('fs');              // 文件系统
 const path = require('path');          // 路径处理
 
-const PORT = 3004;                     // 端口号
+const PORT = 3005;                     // 端口号（第 2 版，端口 3004 → 3005）
 
 /* ===== readDb =====
  * 功能: 同步读取 db.json 文件并解析成 JS 对象
