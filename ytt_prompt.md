@@ -134,3 +134,24 @@ swiper-vertical.html — 左右并排对比两轮产出，同样的 nature 图�
 - poem-list-port3005.html — 上图下文卡片网格，fetch 端口 3005，水墨蓝配色（和 V1 暖棕区分）
 - V2 新增左上角半透明编号徽章（backdrop-filter:blur）
 - poem-list.html（V1，端口 3004）保留不动
+
+---
+
+**时间**：2026-11-12  
+**模型**：Trae  
+**提示词**：
+
+课堂任务三档进阶：
+任务一 ⭐ 跑通全链路：fetch 两段式 + catch 错误处理（关服务器刷新不能白屏）
+任务二 ⭐⭐ 数据我来定：db.json 新增 2 条 poems + server.js 新增 /authors 接口 + Promise.all 并发
+任务三 ⭐⭐⭐ 加交互：搜索框（按标题/内容过滤）+ 按标题长度排序按钮
+
+#### 实现
+- db/db.json — poems 从 4 条 → **6 条**（新增《静夜思》李白、《登鹳雀楼》王之涣），新增 authors 数组（6 个作者，含 id/name/dynasty/works）
+- db/server.js — 新增 `GET /api/authors` 接口 + **新增静态文件服务**（可直接访问 http://localhost:3005/poems.html）
+- poems.html — 新建，包含全部三档任务功能：
+  - Promise.all 同时 fetch /api/poems + /api/authors（任务二）
+  - fetch 两段式 .then(resp.json()).then().catch() 错误处理（任务一）
+  - 搜索框 input 事件实时过滤 + 按标题长度排序按钮三级切换（任务三）
+  - 自动匹配诗词 → 作者（通过 works 数组匹配标题）
+  - CORS Access-Control-Allow-Origin: * 跨域放行

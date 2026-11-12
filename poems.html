@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>诗词列表 · 三档进阶任务</title>
+<!--
+  作者: 杨婷婷
+  建立时间: 2026-11-12
+  使用模型: Trae
+  功能名称: 诗词列表综合练习页（课堂任务一二三合并）
+  功能简介:
+    任务一 ⭐ 跑通全链路：fetch 两段式 + catch 错误处理
+             （关闭服务器再刷新 → 显示友好错误提示，不是白屏）
+    任务二 ⭐⭐ 数据我来定：Promise.all 并发请求 /api/poems + /api/authors
+             新增 2 条 poems + 新增 /api/authors 接口
+    任务三 ⭐⭐⭐ 加交互：搜索框 + 按标题长度排序按钮
+  服务器: node db/server.js （端口 3005）
+  接口:  http://localhost:3005/api/poems
+         http://localhost:3005/api/authors
+-->
+<style>
+  /* ===== Reset ===== */
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei","Noto Serif SC",serif;
+    background:linear-gradient(180deg,#fdf8f3 0%,#f5ede2 100%);
+    color:#2c1810;min-height:100vh;padding:24px 16px 80px;
+  }
+
+  /* ===== 顶部导航 ===== */
+  .ytt_top{max-width:960px;margin:0 auto 20px;display:flex;justify-content:space-between;align-items:center;}
+  .ytt_home{color:#8b6f47;text-decoration:none;font-size:13px;}
+  .ytt_home:hover{color:#5a4430;}
+  .ytt_sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#8b6f47;letter-spacing:.1em;}
+
+  /* ===== 标题栏 ===== */
+  .ytt_head{
+    max-width:960px;margin:0 auto 24px;
+    background:linear-gradient(135deg,#3d2914,#8b5a2b);
+    border-radius:16px;padding:28px 32px;color:#fff;
+    box-shadow:0 12px 30px rgba(61,41,20,.25);
+  }
+  .ytt_head h1{font-size:22px;margin-bottom:6px;letter-spacing:2px;}
+  .ytt_head p{font-size:13px;color:#e8d5bf;line-height:1.8;}
+  .ytt_head .ytt_badges{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
+  .ytt_head .ytt_badge{
+    display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;
+    background:rgba(255,255,255,.15);color:#ffd97a;letter-spacing:.1em;
+  }
+
+  /* ===== 工具栏（搜索 + 排序） ===== */
+  .ytt_toolbar{
+    max-width:960px;margin:0 auto 18px;
+    background:#fff;border:1px solid #e8dcc8;border-radius:12px;
+    padding:14px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+    box-shadow:0 2px 8px rgba(61,41,20,.05);
+  }
+  .ytt_search-wrap{flex:1;min-width:200px;position:relative;}
+  .ytt_search-wrap::before{
+    content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    font-size:13px;opacity:.6;pointer-events:none;
+  }
+  .ytt_search{
+    width:100%;padding:10px 14px 10px 36px;border:1px solid #d4b896;border-radius:8px;
+    font-size:14px;font-family:inherit;background:#fff;transition:border-color .2s;
+  }
+  .ytt_search:focus{outline:none;border-color:#8b5a2b;}
+  .ytt_sort-btn{
+    padding:10px 18px;border:1px solid #8b5a2b;background:#fff;color:#8b5a2b;
+    border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;transition:all .2s;
+    white-space:nowrap;
+  }
+  .ytt_sort-btn:hover{background:#8b5a2b;color:#fff;}
+  .ytt_sort-btn.ytt_active{background:#8b5a2b;color:#fff;}
+  .ytt_count{
+    font-family:"SF Mono",Consolas,monospace;font-size:12px;color:#8b6f47;
+    padding:8px 12px;background:#f5ede2;border-radius:8px;
+  }
+
+  /* ===== 状态提示 ===== */
+  .ytt_state{
+    max-width:960px;margin:0 auto;padding:50px 20px;text-align:center;
+    color:#8b6f47;font-size:14px;
+  }
+  .ytt_state .ytt_icon{font-size:44px;margin-bottom:12px;display:block;}
+  .ytt_state .ytt_err-detail{
+    margin-top:14px;padding:12px 18px;background:#fef3f2;border:1px solid #fecaca;
+    border-radius:8px;color:#b91c1c;font-size:12.5px;line-height:1.8;text-align:left;
+  }
+  .ytt_state .ytt_err-detail code{
+    background:#fee2e2;padding:1px 6px;border-radius:4px;font-family:monospace;
+  }
+  .ytt_state .ytt_retry{
+    margin-top:14px;padding:8px 22px;border:none;border-radius:999px;
+    background:#8b5a2b;color:#fff;font-size:13px;cursor:pointer;
+  }
+
+  /* ===== 卡片网格 ===== */
+  .ytt_grid{
+    max-width:960px;margin:0 auto;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:20px;
+  }
+  .ytt_card{
+    background:#fff;border-radius:12px;overflow:hidden;
+    border:1px solid #e8dcc8;box-shadow:0 2px 10px rgba(61,41,20,.06);
+    transition:transform .25s, box-shadow .25s;
+    display:flex;flex-direction:column;position:relative;
+  }
+  .ytt_card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(61,41,20,.12);}
+  .ytt_card .ytt_num{
+    position:absolute;top:10px;left:10px;z-index:5;
+    background:rgba(61,41,20,.82);color:#fff;
+    font-family:"SF Mono",Consolas,monospace;font-size:11px;font-weight:600;
+    padding:3px 10px;border-radius:999px;letter-spacing:.15em;backdrop-filter:blur(6px);
+  }
+  .ytt_img-wrap{width:100%;aspect-ratio:4/3;overflow:hidden;background:#e8dcc8;}
+  .ytt_img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .5s;}
+  .ytt_card:hover .ytt_img-wrap img{transform:scale(1.05);}
+  .ytt_img-wrap .ytt_fallback{
+    width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#d4b896,#e8dcc8);color:#8b6f47;font-size:36px;
+  }
+  .ytt_content{padding:16px 18px 20px;flex:1;display:flex;flex-direction:column;}
+  .ytt_title{
+    font-size:17px;font-weight:600;color:#3d2914;margin-bottom:8px;letter-spacing:1px;
+    border-left:3px solid #8b5a2b;padding-left:10px;
+  }
+  .ytt_poem{
+    font-size:13.5px;color:#5a4430;line-height:2;margin-bottom:12px;
+    font-family:"Noto Serif SC","Songti SC","SimSun",serif;
+  }
+  .ytt_author-chip{
+    display:inline-block;background:#f5ede2;color:#5a4430;
+    font-size:11px;padding:2px 10px;border-radius:999px;margin-bottom:10px;
+    font-family:"SF Mono",Consolas,monospace;
+  }
+  .ytt_meta{
+    margin-top:auto;display:flex;justify-content:space-between;align-items:center;
+    font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#a88a60;
+  }
+
+  /* ===== 空结果 ===== */
+  .ytt_empty{
+    max-width:960px;margin:0 auto;padding:50px 20px;text-align:center;color:#8b6f47;font-size:14px;
+  }
+  .ytt_empty .ytt_icon{font-size:40px;margin-bottom:12px;display:block;}
+
+  /* ===== 页脚说明 ===== */
+  .ytt_footer{
+    max-width:960px;margin:32px auto 0;
+    background:#fff;border:1px dashed #d4b896;border-radius:12px;
+    padding:14px 20px;font-size:12px;color:#8b6f47;line-height:1.9;
+  }
+  .ytt_footer b{color:#5a4430;}
+  .ytt_footer code{
+    background:#f5ede2;padding:1px 7px;border-radius:4px;
+    font-family:"SF Mono",Consolas,monospace;font-size:11.5px;color:#3d2914;
+  }
+
+  @media(max-width:680px){
+    .ytt_head{padding:20px 20px;}
+    .ytt_head h1{font-size:18px;}
+    .ytt_toolbar{flex-direction:column;align-items:stretch;}
+    .ytt_grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="ytt_top">
+  <a href="index.html" class="ytt_home">← 返回首页</a>
+  <span class="ytt_sub">POEMS · PROMISE.ALL · SEARCH · SORT</span>
+</div>
+
+<div class="ytt_head">
+  <h1>诗词列表 <b>· 三档进阶任务</b></h1>
+  <p>fetch 两段式 + catch 错误处理（任务一）· Promise.all 并发两接口（任务二）· 搜索 + 排序（任务三）</p>
+  <div class="ytt_badges">
+    <span class="ytt_badge">⭐ 跑通全链路</span>
+    <span class="ytt_badge">⭐⭐ 数据我来定</span>
+    <span class="ytt_badge">⭐⭐⭐ 加交互</span>
+  </div>
+</div>
+
+<!-- 工具栏：搜索 + 排序 + 计数 -->
+<div class="ytt_toolbar">
+  <div class="ytt_search-wrap">
+    <input type="text" id="ytt_search" class="ytt_search" placeholder="输入关键字，按标题或内容搜索……">
+  </div>
+  <button id="ytt_sortBtn" class="ytt_sort-btn">按标题长度排序</button>
+  <span id="ytt_count" class="ytt_count">共 0 首</span>
+</div>
+
+<!-- 状态提示（加载中 / 错误 / 空数据） -->
+<div id="ytt_state" class="ytt_state">
+  <span class="ytt_icon">📜</span>
+  <div id="ytt_state_text">正在加载诗词和作者……</div>
+</div>
+
+<!-- 卡片网格 -->
+<div id="ytt_grid" class="ytt_grid"></div>
+
+<!-- 空结果提示 -->
+<div id="ytt_empty" class="ytt_empty" style="display:none;">
+  <span class="ytt_icon">🍃</span>
+  <div>没有找到匹配的诗词</div>
+</div>
+
+<div class="ytt_footer">
+  <b>💡 课堂任务说明：</b><br>
+  任务一 <b>catch 分支</b>：关闭服务器再刷新 → 显示友好错误提示（不是白屏）<br>
+  任务二 <b>Promise.all</b>：同时请求 <code>/api/poems</code> 和 <code>/api/authors</code>，并发比串行快<br>
+  任务三 <b>搜索 + 排序</b>：数据过滤在前端完成（不需要重新 fetch）<br>
+  启动服务器：<code>node db/server.js</code> · 端口 <code>3005</code>
+</div>
+
+<script>
+/* ===== 配置 ===== */
+const YTT_POEMS_URL   = 'http://localhost:3005/api/poems';
+const YTT_AUTHORS_URL = 'http://localhost:3005/api/authors';
+
+/* ===== 全局数据（fetch 回来后存这里，搜索/排序用） ===== */
+let ytt_allPoems = [];      // 所有诗词
+let ytt_allAuthors = [];    // 所有作者
+let ytt_sortAsc = true;     // 排序方向（true=升序）
+let ytt_sortActive = false; // 排序按钮是否激活
+
+/* ===== ytt_setState =====
+ * 功能: 显示 加载中 / 错误 / 隐藏 三种状态
+ * 参数: type - 'loading' | 'error' | 'hide'
+ *       opts - { msg, detail } 可选
+ * 返回: 无
+ */
+function ytt_setState(type, opts) {
+  const box = document.getElementById('ytt_state');
+  const grid = document.getElementById('ytt_grid');
+  const empty = document.getElementById('ytt_empty');
+
+  if (type === 'loading') {
+    box.style.display = 'block';
+    grid.style.display = 'none';
+    empty.style.display = 'none';
+    box.innerHTML = '<span class="ytt_icon">📜</span><div>' + (opts && opts.msg ? opts.msg : '正在加载……') + '</div>';
+  } else if (type === 'error') {
+    box.style.display = 'block';
+    grid.style.display = 'none';
+    empty.style.display = 'none';
+    const detailHtml = opts && opts.detail
+      ? '<div class="ytt_err-detail">' + opts.detail + '</div>'
+      : '';
+    box.innerHTML = '<span class="ytt_icon" style="font-size:48px;">⚠️</span>'
+                  + '<div style="color:#b91c1c;font-size:14px;">' + (opts && opts.msg ? opts.msg : '加载失败') + '</div>'
+                  + detailHtml
+                  + '<button class="ytt_retry" onclick="ytt_fetchAll()">重试</button>';
+  } else {
+    box.style.display = 'none';
+    grid.style.display = 'grid';
+  }
+}
+
+/* ===== ytt_imgError =====
+ * 功能: 图片加载失败时替换成占位符
+ * 参数: img - 出错的 img DOM
+ * 返回: 无
+ */
+function ytt_imgError(img) {
+  const fb = document.createElement('div');
+  fb.className = 'ytt_fallback';
+  fb.textContent = '🎋';
+  img.replaceWith(fb);
+}
+
+/* ===== ytt_findAuthor =====
+ * 功能: 根据诗词标题匹配作者（从 authors 数组里找 works 包含该标题的作者）
+ * 参数: poemTitle - 诗词标题字符串
+ * 返回: String（作者名 + 朝代，找不到返回空串）
+ */
+function ytt_findAuthor(poemTitle) {
+  for (let i = 0; i < ytt_allAuthors.length; i++) {
+    const a = ytt_allAuthors[i];
+    if (a.works && a.works.indexOf(poemTitle) !== -1) {
+      return a.name + ' · ' + a.dynasty;
+    }
+  }
+  return '';
+}
+
+/* ===== ytt_render =====
+ * 功能: 渲染诗词卡片网格（上图下文）
+ * 参数: poems - 要显示的数组（可能是过滤/排序后的子集）
+ * 返回: 无
+ */
+function ytt_render(poems) {
+  const grid = document.getElementById('ytt_grid');
+  const empty = document.getElementById('ytt_empty');
+  const countEl = document.getElementById('ytt_count');
+
+  grid.innerHTML = '';
+  countEl.textContent = '共 ' + poems.length + ' 首';
+
+  if (poems.length === 0) {
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+  }
+
+  poems.forEach(function(item, index) {
+    const card = document.createElement('div');
+    card.className = 'ytt_card';
+
+    const authorInfo = ytt_findAuthor(item.title);
+
+    card.innerHTML =
+      '<span class="ytt_num">#' + (index + 1).toString().padStart(2, '0') + '</span>'
+      + '<div class="ytt_img-wrap">'
+        + '<img src="' + item.pic + '" alt="' + item.title + '" loading="lazy" onerror="ytt_imgError(this)">'
+      + '</div>'
+      + '<div class="ytt_content">'
+        + '<div class="ytt_title">' + item.title + '</div>'
+        + (authorInfo ? '<span class="ytt_author-chip">' + authorInfo + '</span>' : '')
+        + '<div class="ytt_poem">' + item.content + '</div>'
+        + '<div class="ytt_meta">'
+          + '<span>POEM</span>'
+          + '<span>LEN ' + item.title.length + '</span>'
+        + '</div>'
+      + '</div>';
+
+    grid.appendChild(card);
+  });
+}
+
+/* ===== ytt_doSearch =====
+ * 功能: 搜索过滤（按标题或内容匹配关键字，不区分大小写）
+ * 参数: 无（读 #ytt_search 的值）
+ * 返回: 无（直接调 ytt_render）
+ */
+function ytt_doSearch() {
+  const keyword = document.getElementById('ytt_search').value.trim().toLowerCase();
+  let list = ytt_allPoems.slice();   // 拷贝一份，不改动原数组
+
+  if (keyword) {
+    /* ===== 过滤：标题或内容包含关键字 ===== */
+    list = list.filter(function(p) {
+      return (p.title.toLowerCase().indexOf(keyword) !== -1)
+          || (p.content.toLowerCase().indexOf(keyword) !== -1);
+    });
+  }
+
+  /* ===== 如果排序激活，对结果排序 ===== */
+  if (ytt_sortActive) {
+    list.sort(function(a, b) {
+      const lenDiff = a.title.length - b.title.length;
+      return ytt_sortAsc ? lenDiff : -lenDiff;
+    });
+  }
+
+  ytt_render(list);
+}
+
+/* ===== ytt_toggleSort =====
+ * 功能: 切换"按标题长度排序"按钮（升序 → 降序 → 取消）
+ * 参数: 无
+ * 返回: 无
+ */
+function ytt_toggleSort() {
+  const btn = document.getElementById('ytt_sortBtn');
+
+  if (!ytt_sortActive) {
+    // 第一次点：激活，升序
+    ytt_sortActive = true;
+    ytt_sortAsc = true;
+    btn.classList.add('ytt_active');
+    btn.textContent = '标题长度 · 短 → 长';
+  } else if (ytt_sortAsc) {
+    // 第二次点：降序
+    ytt_sortAsc = false;
+    btn.textContent = '标题长度 · 长 → 短';
+  } else {
+    // 第三次点：取消排序
+    ytt_sortActive = false;
+    btn.classList.remove('ytt_active');
+    btn.textContent = '按标题长度排序';
+  }
+
+  ytt_doSearch();   // 重新渲染
+}
+
+/* ===== ytt_fetchAll =====
+ * 功能: Promise.all 并发请求 /api/poems + /api/authors
+ *       这就是任务二要求的"两次 fetch 同时取回两份数据"
+ *       同时包含任务一要求的"catch 错误处理"
+ * 参数: 无
+ * 返回: Promise<void>
+ */
+function ytt_fetchAll() {
+  ytt_setState('loading', { msg: '正在用 Promise.all 并发请求两个接口……' });
+
+  /* ===== Promise.all：两个 fetch 同时发，谁也不等谁 ===== */
+  Promise.all([
+    fetch(YTT_POEMS_URL).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' (poems)');
+      return r.json();
+    }),
+    fetch(YTT_AUTHORS_URL).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' (authors)');
+      return r.json();
+    })
+  ])
+  .then(function(results) {
+    /* ===== 两个接口都成功 ===== */
+    ytt_allPoems = results[0] || [];      // Promise.all 返回数组，按顺序对应
+    ytt_allAuthors = results[1] || [];
+
+    if (ytt_allPoems.length === 0 && ytt_allAuthors.length === 0) {
+      ytt_setState('loading', { msg: '服务器返回了空数据' });
+      ytt_render([]);
+      ytt_setState('hide');
+      return;
+    }
+
+    ytt_render(ytt_allPoems);              // 渲染诗词（作者信息已 ytt_findAuthor 匹配）
+    ytt_setState('hide');
+  })
+  .catch(function(err) {
+    /* ===== 任务一要求：catch 分支不能让页面白屏 =====
+     * 两种情况：
+     *   1. 服务器没启动 → fetch 直接抛 TypeError: Failed to fetch
+     *   2. 服务器起了但某个接口 404 → then 里 throw 的 HTTP 错误
+     */
+    console.error('Promise.all 失败:', err);
+
+    let msg = '连接数据服务器失败';
+    let detail = '';
+
+    if (err.message && err.message.indexOf('Failed to fetch') !== -1) {
+      detail = '服务器 <code>localhost:3005</code> 没有响应。<br>'
+             + '请先在终端执行：<code>node db/server.js</code>';
+    } else if (err.message && err.message.indexOf('HTTP') !== -1) {
+      detail = '服务器返回了错误状态码：<code>' + err.message + '</code><br>'
+             + '请检查 <code>db/server.js</code> 中的接口路由是否正确';
+    } else {
+      detail = '错误详情：<code>' + err.message + '</code><br>'
+             + '请确认 <code>node db/server.js</code> 正在运行（端口 3005）';
+    }
+
+    ytt_setState('error', { msg: msg, detail: detail });
+  });
+}
+
+/* ===== ytt_init =====
+ * 功能: DOM 就绪后绑定事件 + 发起请求
+ * 参数: 无
+ * 返回: 无
+ */
+function ytt_init() {
+  // 搜索框实时过滤
+  document.getElementById('ytt_search').addEventListener('input', ytt_doSearch);
+
+  // 排序按钮
+  document.getElementById('ytt_sortBtn').addEventListener('click', ytt_toggleSort);
+
+  // 发起 Promise.all 请求
+  ytt_fetchAll();
+}
+
+document.addEventListener('DOMContentLoaded', ytt_init);
+</script>
+
+</body>
+</html>

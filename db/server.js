@@ -95,6 +95,57 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  /* ===== 路由: GET /api/authors =====
+   * 返回所有作者列表（任务二新增）
+   */
+  if (req.url === '/api/authors' || req.url === '/api/authors/') {
+    try {
+      const db = readDb();
+      sendJson(res, db.authors || []);    // 兜底：没有 authors 就返回空数组
+    } catch (err) {
+      sendJson(res, { error: '读取作者数据失败', detail: err.message }, 500);
+    }
+    return;
+  }
+
+  /* ===== 静态文件服务（项目根目录的 .html 文件）=====
+   * 让 http://localhost:3005/poems.html 能直接打开
+   */
+  const staticFile = req.url.split('?')[0];   // 去掉查询参数
+  const rootDir = path.join(__dirname, '..');
+  const filePath = path.join(rootDir, staticFile);
+
+  // 安全：防止路径穿越（../）
+  if (!filePath.startsWith(rootDir)) {
+    sendJson(res, { error: '非法路径' }, 403);
+    return;
+  }
+
+  try {
+    const stat = fs.statSync(filePath);
+    if (stat.isFile()) {
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeTypes = {
+        '.html': 'text/html; charset=utf-8',
+        '.css':  'text/css; charset=utf-8',
+        '.js':   'application/javascript; charset=utf-8',
+        '.json': 'application/json; charset=utf-8',
+        '.jpg':  'image/jpeg',
+        '.png':  'image/png',
+        '.svg':  'image/svg+xml'
+      };
+      const contentType = mimeTypes[ext] || 'application/octet-stream';
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Access-Control-Allow-Origin': '*'
+      });
+      fs.createReadStream(filePath).pipe(res);
+      return;
+    }
+  } catch (err) {
+    // 文件不存在，继续往下走
+  }
+
   /* ===== 路由: GET /db.json（直接拿原始文件） ===== */
   if (req.url === '/db.json') {
     try {
@@ -112,7 +163,7 @@ const server = http.createServer((req, res) => {
   }
 
   /* ===== 其他路由 → 404 ===== */
-  sendJson(res, { error: '接口不存在。可用接口: /api/poems, /api/poem/:index, /db.json' }, 404);
+  sendJson(res, { error: '接口不存在。可用接口: /api/poems, /api/poem/:index, /api/authors, /db.json' }, 404);
 });
 
 server.listen(PORT, () => {
