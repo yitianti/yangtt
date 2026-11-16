@@ -84,7 +84,7 @@
 <div class="hy_scale_badge" id="hy_scaleBadge">1.0x</div>
 
 <div class="hy_viewer" id="hy_viewer">
-  <img class="hy_img" id="hy_img" src="https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/5.jpg" alt="查看图片">
+  <img class="hy_img" id="hy_img" src="img/2.jpg" alt="查看图片">
 </div>
 
 <div class="hy_hint">
@@ -480,6 +480,41 @@ function hy_init() {
   viewer.addEventListener('touchmove',  hy_onTouchMove,  { passive: false });
   viewer.addEventListener('touchend',   hy_onTouchEnd,  { passive: false });
   window.addEventListener('resize', hy_onResize);
+
+  // ===== 桌面鼠标模拟（方便电脑上测试双击 + 拖动）=====
+  // 双指 pinch 只能在手机上用鼠标无法模拟
+  let hy_mouseDown = false;
+  viewer.addEventListener('mousedown', function(e) {
+    hy_mouseDown = true;
+    const now = Date.now();
+    // 双击检测（和 touchstart 里逻辑一致）
+    if (now - hy_state.lastTapTime < 300
+        && Math.abs(e.clientX - hy_state.lastTapX) < 25
+        && Math.abs(e.clientY - hy_state.lastTapY) < 25) {
+      hy_state.touches = [{ id: 1, x: e.clientX, y: e.clientY }];
+      hy_doDoubleTap();
+      hy_mouseDown = false;
+      return;
+    }
+    hy_state.lastTapTime = now;
+    hy_state.lastTapX = e.clientX;
+    hy_state.lastTapY = e.clientY;
+    // 记录起始位置（供后续拖动计算 dx/dy）
+    hy_state.lastSingleX = e.clientX;
+    hy_state.lastSingleY = e.clientY;
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!hy_mouseDown) return;
+    // 单指拖动（只有 scale > 1 才生效，hy_drag 自己会判断）
+    hy_state.touches = [{ id: 1, x: e.clientX, y: e.clientY }];
+    hy_drag();
+  });
+  window.addEventListener('mouseup', function(e) {
+    if (!hy_mouseDown) return;
+    hy_mouseDown = false;
+    hy_state.touches = [];
+    hy_onTouchEnd({ touches: [] });
+  });
 }
 
 document.addEventListener('DOMContentLoaded', hy_init);

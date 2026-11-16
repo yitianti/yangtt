@@ -189,3 +189,59 @@ swiper-vertical.html — 左右并排对比两轮产出，同样的 nature 图�
 - 拖动时在探针区自动画轨迹点（start 绿 / move 黄 / end 蓝）
 - 节流：move 每 3 次打一条日志，每 5 次画一个点，防止爆量
 - click 事件在 touchend 之后触发，拖动不会产生 click（这个在日志里会直观看到）
+
+---
+
+**时间**：2026-11-16（第二次）  
+**模型**：Trae  
+**提示词**：
+
+任务三没有图片 任务二也没有图片 任务一也如图片上所示 我建议将这四个文件在index中合并为一个入口 这样方便我点击
+
+#### 问题排查
+- mobile-zoom.html / mobile-gesture.html 的图片引用了 Gitee 远程 URL（`gitee.com/wangyao_jsj/...`），校园网屏蔽 Gitee 导致加载失败
+- 本地 `img/` 目录已有 1.jpg~5.jpg、7.jpg、8.png，之前没用到
+
+#### 修复内容
+1. mobile-zoom.html：`gitee img/5.jpg` → 本地 `img/5.jpg`
+2. mobile-gesture.html：4 张图全改本地路径（6.jpg 本地不存在，用 7.jpg 替代红烧肉）
+3. index.html：原来 4 个独立入口合并成 1 个入口，page-desc 里内嵌 4 个子任务快捷链接
+
+---
+
+**时间**：2026-11-16（第三次）  
+**模型**：Trae  
+**提示词**：
+
+图片任务二帮我生成符合的图片呗 任务三图片用本地2.jpg 任务一只需要回答那三个问题就可以
+
+#### 实现
+1. 任务三 mobile-zoom.html：图片从 `img/5.jpg` → `img/2.jpg`
+2. 任务二 mobile-gesture.html：用 GenerateImage 工具生成四张美食图，落地到 `img/dishes/`
+   - hongshaorou.jpg 青花瓷碗红烧肉
+   - gongbaojiding.jpg 宫保鸡丁
+   - mapodoufu.jpg 青花瓷碗麻婆豆腐
+   - qingzhengluyu.jpg 清蒸鲈鱼
+   - HY_DISHES 数组 img 路径全部改为本地 `img/dishes/*.jpg`
+3. 任务一 mobile-probe.html：三个思考问题区默认展开（加 `hy_open` class）
+
+---
+
+**时间**：2026-11-16（第四次）  
+**模型**：Trae  
+**提示词**：
+
+这里实现的只有双指缩放
+
+#### 问题根因
+mobile-zoom.html 只监听了 touch 事件，没有桌面鼠标模拟。用户在电脑上打开页面时：
+- 双指缩放（触摸板捏合）→ 有效（因为浏览器会转成 touch 事件）
+- 鼠标双击 → 无效（只在 touchstart 里检测双击）
+- 鼠标拖动 → 无效（只在 touchmove 里处理拖动）
+
+#### 修复
+在 hy_init 里加桌面鼠标 polyfill：
+- mousedown 里检测双击（300ms / 25px 阈值）→ 触发 hy_doDoubleTap
+- mousemove（按住时）→ 模拟单指拖动 → hy_drag
+- mouseup → 收尾 → hy_onTouchEnd({touches:[]})
+- 双指 pinch 只能手机测，鼠标无法模拟
