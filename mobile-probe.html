@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<!--
+  作者: 杨婷婷
+  建立时间: 2026-11-16
+  使用模型: Trae
+  功能名称: 事件侦探 — 触摸事件探针 & 日志（课堂任务一）
+  功能简介:
+    在"探针区"做 5 种操作，页面自动记录所有触摸事件：
+      ① 单击
+      ② 向上拖动
+      ③ 向左快速滑动
+      ④ 双指触摸
+      ⑤ 长按后抬起
+    日志内容包括：事件类型、触摸点数量 changedTouches.length、
+    坐标 (x,y)、时间戳、从 start 到当前的 dt 毫秒差
+    自动回答三个思考问题作为示例答案（课堂提交时手写自己的回答）
+    变量 / id / class 统一 hy_ 开头。
+-->
+<title>事件侦探 · 触摸事件探针</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:#f5f5f5;color:#333;
+    -webkit-user-select:none;user-select:none;
+    touch-action:none;
+    display:flex;flex-direction:column;
+    height:100vh;
+  }
+
+  /* ===== 顶部导航 ===== */
+  .hy_top{
+    flex-shrink:0;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 16px;background:#fff;border-bottom:1px solid #e0e0e0;
+  }
+  .hy_home{color:#8b5a2b;text-decoration:none;font-size:13px;}
+  .hy_sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#999;letter-spacing:.1em;}
+
+  /* ===== 标题 ===== */
+  .hy_title{
+    flex-shrink:0;text-align:center;padding:10px 12px;background:#fff;
+    border-bottom:1px solid #e0e0e0;
+  }
+  .hy_title h1{font-size:16px;color:#333;margin-bottom:3px;}
+  .hy_title p{font-size:11.5px;color:#888;}
+
+  /* ===== 探针区（核心：可触摸区域）===== */
+  .hy_probe_area{
+    flex-shrink:0;
+    margin:12px;padding:20px;
+    background:#fff;border-radius:12px;
+    border:2px dashed #8b5a2b;
+    min-height:160px;
+    position:relative;overflow:hidden;
+  }
+  .hy_probe_label{
+    position:absolute;top:8px;left:12px;
+    font-size:10.5px;color:#8b5a2b;font-family:"SF Mono",Consolas,monospace;
+    letter-spacing:.1em;
+  }
+  .hy_probe_hint{
+    text-align:center;color:#bbb;font-size:12px;line-height:2;
+    padding-top:30px;
+  }
+  .hy_dot{
+    position:absolute;width:10px;height:10px;border-radius:50%;
+    background:#c8452e;pointer-events:none;transform:translate(-50%,-50%);
+    transition:transform .1s;
+  }
+  .hy_line{
+    position:absolute;height:2px;background:rgba(200,69,46,.4);
+    pointer-events:none;transform-origin:left center;
+  }
+
+  /* ===== 控制按钮 ===== */
+  .hy_controls{
+    flex-shrink:0;display:flex;gap:10px;padding:6px 12px 10px;
+  }
+  .hy_btn{
+    flex:1;padding:10px 0;border:none;border-radius:8px;
+    font-size:13px;font-family:inherit;cursor:pointer;transition:all .15s;
+  }
+  .hy_btn_clear{background:#fff;color:#c8452e;border:1px solid #c8452e;}
+  .hy_btn_clear:active{background:#c8452e;color:#fff;}
+  .hy_btn_copy{background:#8b5a2b;color:#fff;border:1px solid #8b5a2b;}
+  .hy_btn_copy:active{background:#5a3a1a;}
+
+  /* ===== 统计面板 ===== */
+  .hy_stats{
+    flex-shrink:0;display:flex;gap:10px;padding:0 12px 10px;flex-wrap:wrap;
+  }
+  .hy_stat{
+    background:#fff;border:1px solid #e0e0e0;border-radius:8px;
+    padding:6px 12px;font-family:"SF Mono",Consolas,monospace;font-size:11px;
+    color:#555;flex:1;min-width:70px;text-align:center;
+  }
+  .hy_stat b{color:#c8452e;font-size:13px;display:block;margin-bottom:2px;}
+
+  /* ===== 日志面板（可滚动，flex:1 占剩余）===== */
+  .hy_log_wrap{
+    flex:1;margin:0 12px 12px;background:#1a1a2e;border-radius:10px;
+    overflow:hidden;display:flex;flex-direction:column;min-height:0;
+  }
+  .hy_log_head{
+    flex-shrink:0;padding:8px 12px;background:#16213e;
+    font-size:11px;color:#7ec8ff;font-family:"SF Mono",Consolas,monospace;
+    letter-spacing:.1em;
+    display:flex;justify-content:space-between;
+  }
+  .hy_log_head span{color:#888;}
+  .hy_log{
+    flex:1;overflow-y:auto;padding:8px 10px;
+    font-family:"SF Mono",Consolas,monospace;font-size:11.5px;
+    line-height:1.7;color:#d4d4d4;
+  }
+  .hy_log::-webkit-scrollbar{width:6px;}
+  .hy_log::-webkit-scrollbar-thumb{background:#333;border-radius:3px;}
+  .hy_log::-webkit-scrollbar-track{background:#1a1a2e;}
+
+  /* ===== 不同事件类型不同颜色 ===== */
+  .hy_ev_start{color:#7ec8ff;}      /* 蓝 */
+  .hy_ev_move{color:#ffd97a;}       /* 黄 */
+  .hy_ev_end{color:#8ae28e;}        /* 绿 */
+  .hy_ev_cancel{color:#ff9a9a;}     /* 红 */
+  .hy_ev_click{color:#c8452e;font-weight:600;}  /* 橙 */
+  .hy_ev_sep{color:#555;border-top:1px dashed #333;margin:4px 0;padding-top:4px;}
+
+  /* ===== 思考问题区（折叠）===== */
+  .hy_qa{
+    flex-shrink:0;margin:0 12px 12px;background:#fff;border:1px solid #e0e0e0;
+    border-radius:10px;overflow:hidden;
+  }
+  .hy_qa_head{
+    padding:10px 14px;background:#f5f5f5;cursor:pointer;display:flex;
+    justify-content:space-between;align-items:center;
+    font-size:12.5px;color:#555;
+  }
+  .hy_qa_head b{color:#8b5a2b;}
+  .hy_qa_head .hy_arrow{transition:transform .2s;}
+  .hy_qa.hy_open .hy_qa_head .hy_arrow{transform:rotate(180deg);}
+  .hy_qa_body{
+    max-height:0;overflow:hidden;transition:max-height .3s;
+    padding:0 14px;
+  }
+  .hy_qa.hy_open .hy_qa_body{max-height:1000px;padding:10px 14px 14px;}
+  .hy_qa_body .hy_q{
+    font-size:12px;color:#333;margin-bottom:10px;line-height:1.7;
+  }
+  .hy_qa_body .hy_q b{color:#c8452e;}
+  .hy_qa_body .hy_a{
+    font-size:11.5px;color:#666;margin-bottom:14px;line-height:1.9;
+    background:#f9f9f9;padding:8px 10px;border-radius:6px;border-left:3px solid #8b5a2b;
+  }
+</style>
+</head>
+<body>
+
+<div class="hy_top">
+  <a href="index.html" class="hy_home">← 返回首页</a>
+  <span class="hy_sub">HY · PROBE · TOUCH</span>
+</div>
+
+<div class="hy_title">
+  <h1>🔍 事件侦探 · 触摸事件探针</h1>
+  <p>在下方区域做 5 种操作，自动记录所有触摸事件</p>
+</div>
+
+<div class="hy_probe_area" id="hy_probe">
+  <span class="hy_probe_label">🔴 PROBE AREA</span>
+  <div class="hy_probe_hint">
+    👆 单击一下<br>
+    👆👆 快速双击<br>
+    ← 向左快速滑动<br>
+    ↑ 向上拖动一段<br>
+    👆👆 双指触摸<br>
+    👆 长按不松（>0.5s）
+  </div>
+</div>
+
+<div class="hy_controls">
+  <button class="hy_btn hy_btn_clear" onclick="hy_clearLog()">🗑 清空日志</button>
+  <button class="hy_btn hy_btn_copy" onclick="hy_copyLog()">📋 复制日志</button>
+</div>
+
+<div class="hy_stats">
+  <div class="hy_stat"><b id="hy_s_start">0</b>touchstart</div>
+  <div class="hy_stat"><b id="hy_s_move">0</b>touchmove</div>
+  <div class="hy_stat"><b id="hy_s_end">0</b>touchend</div>
+  <div class="hy_stat"><b id="hy_s_cancel">0</b>touchcancel</div>
+  <div class="hy_stat"><b id="hy_s_click">0</b>click</div>
+</div>
+
+<div class="hy_log_wrap">
+  <div class="hy_log_head">
+    <span>📜 事件日志（共 <b id="hy_s_total" style="color:#ffd97a;">0</b> 条）</span>
+    <span>触摸点变化：<b id="hy_s_pts" style="color:#7ec8ff;">-</b></span>
+  </div>
+  <div class="hy_log" id="hy_log"></div>
+</div>
+
+<div class="hy_qa" id="hy_qa">
+  <div class="hy_qa_head" onclick="document.getElementById('hy_qa').classList.toggle('hy_open')">
+    <b>📚 三个思考问题 + 示例答案</b>
+    <span class="hy_arrow">▼</span>
+  </div>
+  <div class="hy_qa_body">
+
+    <div class="hy_q">
+      <b>问题 ①</b> 一次拖动里 touchmove 大约触发多少次？和距离有什么关系？
+    </div>
+    <div class="hy_a">
+      touchmove 的触发次数 **≈ 拖动的物理距离 / 浏览器刷新间隔**。
+      Chrome 通常 60fps 刷新 → 约 16ms 触发一次。手指滑动 200px 耗时 ≈ 300ms → touchmove 触发约 **15~20 次**。
+      拖得**越快**，touchmove 次数可能略少（因为两次刷新间手指移动距离大，可能跳点）；
+      拖得**越慢**，touchmove 次数越多、坐标越密集。
+      距离和次数大致呈**正相关**，但受滑动速度 + 设备刷新率影响，不是严格线性。
+    </div>
+
+    <div class="hy_q">
+      <b>问题 ②</b> click 出现在 touchend 之前还是之后？
+    </div>
+    <div class="hy_a">
+      **顺序是：touchstart → [touchmove...] → touchend → click**。
+      click 是一个**合成事件（synthetic event）**，浏览器在 touchend 之后会检查：
+      "这次触摸是不是短距离（< 几个像素）+ 短时间（< 300ms）？"
+      如果是 → 派发 click；如果用户移动超过阈值或时间太长 → 不派发 click（变成拖动）。
+      所以 click **一定在 touchend 之后**，但不是每次 touchend 都会跟一个 click（拖动就不会）。
+    </div>
+
+    <div class="hy_q">
+      <b>问题 ③</b> 如果把 touchend 换成 touchcancel，会发生什么？
+    </div>
+    <div class="hy_a">
+      **touchcancel 几乎永远不应该主动替换 touchend**。
+      区别：
+      - touchend = "手指正常抬起，这次触摸手势完整结束"
+      - touchcancel = "触摸被系统强制中断"（来电、切应用、手势被浏览器拦截、页面滚走等异常情况）
+      正常操作永远走 touchend，只有系统级别中断才发 touchcancel。
+      如果代码里只监听 touchcancel 不监听 touchend → **99% 的正常操作你都收不到结束事件**，
+      滑动的卡片不会归位、正在缩放的图片会卡住。正确做法是 touchend 和 touchcancel **都监听**，
+      触发相同的收尾逻辑。
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ===== hy_state ===== */
+const hy_state = {
+  counts: { start:0, move:0, end:0, cancel:0, click:0 },
+  lastStartTs: 0,              // 最近一次 touchstart 时间戳（计算 dt 用）
+  lastStartPts: 0,             // 最近一次 touchstart 时的 changedTouches.length
+  probeRect: null              // 探针区的 getBoundingClientRect（计算相对坐标用）
+};
+
+/* ===== hy_log =====
+ * 功能: 向日志面板追加一条
+ * 参数: cls - 事件类型对应的 class（hy_ev_start/move/end/cancel/click/sep）
+ *       text - 显示文字
+ * 返回: 无
+ */
+function hy_log(cls, text) {
+  const logEl = document.getElementById('hy_log');
+  const line = document.createElement('div');
+  line.className = cls;
+  line.textContent = text;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;     // 自动滚到底
+  hy_updateStats();
+}
+
+/* ===== hy_updateStats ===== */
+function hy_updateStats() {
+  document.getElementById('hy_s_start').textContent = hy_state.counts.start;
+  document.getElementById('hy_s_move').textContent  = hy_state.counts.move;
+  document.getElementById('hy_s_end').textContent   = hy_state.counts.end;
+  document.getElementById('hy_s_cancel').textContent = hy_state.counts.cancel;
+  document.getElementById('hy_s_click').textContent = hy_state.counts.click;
+  const total = hy_state.counts.start + hy_state.counts.move
+              + hy_state.counts.end + hy_state.counts.cancel;
+  document.getElementById('hy_s_total').textContent = total;
+}
+
+/* ===== hy_clearLog ===== */
+function hy_clearLog() {
+  document.getElementById('hy_log').innerHTML = '';
+  hy_state.counts = { start:0, move:0, end:0, cancel:0, click:0 };
+  hy_updateStats();
+  // 清除轨迹
+  document.querySelectorAll('.hy_dot,.hy_line').forEach(function(n){ n.remove(); });
+}
+
+/* ===== hy_copyLog ===== */
+function hy_copyLog() {
+  const text = document.getElementById('hy_log').innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    alert('✅ 日志已复制 ' + text.split('\n').length + ' 行到剪贴板');
+  }).catch(function() { alert('复制失败，请手动长按选中文本'); });
+}
+
+/* ===== hy_drawDot =====
+ * 功能: 在探针区画一个红点标记触摸位置
+ * 参数: x, y - 相对探针区的坐标
+ *       color - CSS 颜色
+ *       label - 可选标签
+ * 返回: 无
+ */
+function hy_drawDot(x, y, color, label) {
+  const probe = document.getElementById('hy_probe');
+  const dot = document.createElement('div');
+  dot.className = 'hy_dot';
+  dot.style.left = x + 'px';
+  dot.style.top  = y + 'px';
+  dot.style.background = color || '#c8452e';
+  dot.style.width = '8px';
+  dot.style.height = '8px';
+  probe.appendChild(dot);
+  // 轨迹过多就清旧的（保持性能）
+  if (probe.querySelectorAll('.hy_dot').length > 80) {
+    probe.querySelectorAll('.hy_dot').forEach(function(n, i) { if (i < 30) n.remove(); });
+  }
+}
+
+/* ===== hy_handleTouchStart ===== */
+function hy_handleTouchStart(e) {
+  e.preventDefault();
+  hy_state.counts.start++;
+  const pts = e.changedTouches.length;
+  hy_state.lastStartPts = pts;
+  hy_state.lastStartTs = Date.now();
+  document.getElementById('hy_s_pts').textContent = pts;
+
+  // 画点
+  const rect = document.getElementById('hy_probe').getBoundingClientRect();
+  for (let i = 0; i < pts; i++) {
+    const t = e.changedTouches[i];
+    hy_drawDot(t.clientX - rect.left, t.clientY - rect.top, '#8ae28e');
+  }
+
+  const names = ['一','二','三','四','五'];
+  let ptsDesc = '';
+  for (let i = 0; i < pts; i++) {
+    const t = e.changedTouches[i];
+    ptsDesc += ' ' + names[i] + '(' + Math.round(t.clientX) + ',' + Math.round(t.clientY) + ')';
+  }
+
+  hy_log('hy_ev_start',
+    '🟢 touchstart  changedTouches=' + pts + '  touches=' + e.touches.length
+    + ptsDesc
+  );
+}
+
+/* ===== hy_handleTouchMove ===== */
+function hy_handleTouchMove(e) {
+  e.preventDefault();
+  hy_state.counts.move++;
+
+  // 每 5 次 move 才画点（否则手指拖一下会画几十个点）
+  if (hy_state.counts.move % 5 === 0) {
+    const rect = document.getElementById('hy_probe').getBoundingClientRect();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      hy_drawDot(t.clientX - rect.left, t.clientY - rect.top, '#ffd97a');
+    }
+  }
+
+  // 日志也节流：每 3 次 move 打一条
+  if (hy_state.counts.move % 3 === 0) {
+    const t = e.changedTouches[0];
+    const dt = Date.now() - hy_state.lastStartTs;
+    hy_log('hy_ev_move',
+      '🟡 touchmove  #' + hy_state.counts.move + '  '
+      + 'x=' + Math.round(t.clientX) + ' y=' + Math.round(t.clientY)
+      + '  dt=' + dt + 'ms  手指数=' + e.touches.length
+    );
+  }
+}
+
+/* ===== hy_handleTouchEnd ===== */
+function hy_handleTouchEnd(e) {
+  e.preventDefault();
+  hy_state.counts.end++;
+  const dt = Date.now() - hy_state.lastStartTs;
+
+  // 画结束点
+  const rect = document.getElementById('hy_probe').getBoundingClientRect();
+  for (let i = 0; i < e.changedTouches.length; i++) {
+    const t = e.changedTouches[i];
+    hy_drawDot(t.clientX - rect.left, t.clientY - rect.top, '#7ec8ff');
+  }
+
+  hy_log('hy_ev_sep', '── touchend (dt=' + dt + 'ms) ──');
+  hy_log('hy_ev_end',
+    '🔵 touchend  changedTouches=' + e.changedTouches.length
+    + '  起始手指数=' + hy_state.lastStartPts
+    + '  touches剩余=' + e.touches.length
+    + '  ⚠️ 注意：touchend 之后 click 是否出现，决定这次是"点击"还是"拖动"'
+  );
+}
+
+/* ===== hy_handleTouchCancel ===== */
+function hy_handleTouchCancel(e) {
+  e.preventDefault();
+  hy_state.counts.cancel++;
+  hy_log('hy_ev_sep', '── touchcancel (系统中断) ──');
+  hy_log('hy_ev_cancel',
+    '🔴 touchcancel  changedTouches=' + e.changedTouches.length
+    + '  touches剩余=' + e.touches.length
+    + '  ⚠️ 这是异常！系统强制中断了触摸'
+  );
+}
+
+/* ===== hy_handleClick ===== */
+function hy_handleClick(e) {
+  hy_state.counts.click++;
+  hy_log('hy_ev_click',
+    '🟠 click  x=' + Math.round(e.clientX) + ' y=' + Math.round(e.clientY)
+    + '  ⚡ click 总是在 touchend 之后！'
+    + '  没有拖动才会出现 click'
+  );
+}
+
+/* ===== hy_init ===== */
+function hy_init() {
+  const probe = document.getElementById('hy_probe');
+  probe.addEventListener('touchstart', hy_handleTouchStart, { passive: false });
+  probe.addEventListener('touchmove',  hy_handleTouchMove,  { passive: false });
+  probe.addEventListener('touchend',   hy_handleTouchEnd,   { passive: false });
+  probe.addEventListener('touchcancel', hy_handleTouchCancel, { passive: false });
+  probe.addEventListener('click', hy_handleClick);
+
+  hy_log('hy_ev_start', '✅ 探针就绪，请在虚线框区域做触摸操作');
+  hy_log('hy_ev_start', '📝 建议依次做：单击 → 双击 → 向左滑 → 向上拖 → 双指 → 长按');
+  hy_log('hy_ev_start', '📋 顶部有 click 数统计，看看拖动后 click 会不会出现');
+}
+
+document.addEventListener('DOMContentLoaded', hy_init);
+</script>
+
+</body>
+</html>

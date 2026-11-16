@@ -172,3 +172,20 @@ swiper-vertical.html — 左右并排对比两轮产出，同样的 nature 图�
 - mobile-gesture.html：touchstart/move/end + 阈值 40px + track translateX + touch-action:pan-y
 - mobile-zoom.html：pinch 算法（两指距离比值 + 中点锁定公式 `newTx = midX - imgCoordX * newScale`）+ 边界钳制
 - mobile-sensor.html：hy_computeAcceleration 计算 sqrt(x²+y²+z²) + 冷却窗口 accelerationIncludingGravity vs acceleration
+
+---
+
+**时间**：2026-11-16  
+**模型**：Trae  
+**提示词**：
+
+课堂任务一：事件侦探 — 触摸事件探针 & 日志。要求做一个探针区，用户在手机上做 5 种操作（单击 / 向上拖动 / 向左快速滑动 / 双指触摸 / 长按抬起），自动记录所有触摸事件的触发顺序、次数、坐标、时间戳。然后回答三个思考问题：
+① 一次拖动里 touchmove 大约触发多少次？和距离有什么关系？
+② click 出现在 touchend 之前还是之后？
+③ 如果把 touchend 换成 touchcancel，会发生什么？
+
+#### 实现
+- mobile-probe.html：探针区 + 事件日志面板（黑底终端风格）+ 统计面板（start/move/end/cancel/click 计数）+ 三个思考问题折叠区（含示例答案）
+- 拖动时在探针区自动画轨迹点（start 绿 / move 黄 / end 蓝）
+- 节流：move 每 3 次打一条日志，每 5 次画一个点，防止爆量
+- click 事件在 touchend 之后触发，拖动不会产生 click（这个在日志里会直观看到）
