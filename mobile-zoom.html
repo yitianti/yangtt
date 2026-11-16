@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<!--
+  作者: 杨婷婷
+  建立时间: 2026-11-16
+  使用模型: Trae
+  功能名称: 图片查看器 — 双指缩放 + 双击放大 + 拖动（课堂任务三 ⭐⭐⭐）
+  功能简介:
+    ① 双指缩放（1x ~ 4x），以两指中心为基准，图片不会"跳走"
+    ② 缩放到边界有限制（不越界）
+    ③ 1x 时不能拖出边界
+    ④ 放大后旋转屏幕不丢失状态
+    ⑤ 双击在 1x 与 2x 之间切换，带 0.25s 过渡
+    变量 / id / class 统一 hy_ 开头。
+-->
+<title>图片查看器 · 双指缩放</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:#0a0a0a;color:#fff;
+    touch-action:none;           /* 禁止浏览器默认手势，图片自己处理 */
+    user-select:none;
+    -webkit-user-select:none;
+  }
+
+  /* ===== 顶部导航 ===== */
+  .hy_top{
+    position:fixed;top:0;left:0;right:0;z-index:10;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 18px;background:linear-gradient(180deg,rgba(0,0,0,.8),rgba(0,0,0,0));
+  }
+  .hy_home{color:#ffd97a;text-decoration:none;font-size:13px;}
+  .hy_home:hover{color:#fff;}
+  .hy_info{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.1em;}
+
+  /* ===== 缩放比例指示器 ===== */
+  .hy_scale_badge{
+    position:fixed;top:54px;left:50%;transform:translateX(-50%);
+    background:rgba(0,0,0,.7);color:#ffd97a;
+    font-family:"SF Mono",Consolas,monospace;font-size:12px;padding:4px 14px;
+    border-radius:999px;letter-spacing:.1em;z-index:10;
+    opacity:0;transition:opacity .3s;
+  }
+  .hy_scale_badge.hy_show{opacity:1;}
+
+  /* ===== 图片容器（核心：overflow:hidden + touch-action:none）===== */
+  .hy_viewer{
+    width:100%;height:100%;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+
+  /* ===== 图片（transform 统一通过 translate + scale）===== */
+  .hy_img{
+    max-width:100%;max-height:100%;
+    transform-origin:0 0;
+    transition:transform .25s cubic-bezier(.25,.46,.45,.94);
+    will-change:transform;
+    pointer-events:none;       /* 让触摸事件落到容器上，统一处理 */
+  }
+
+  /* ===== 底部说明 ===== */
+  .hy_hint{
+    position:fixed;bottom:0;left:0;right:0;z-index:10;
+    background:linear-gradient(0deg,rgba(0,0,0,.8),rgba(0,0,0,0));
+    padding:16px 18px;text-align:center;font-size:11.5px;
+    color:rgba(255,255,255,.65);line-height:1.9;
+  }
+  .hy_hint b{color:#ffd97a;}
+</style>
+</head>
+<body>
+
+<div class="hy_top">
+  <a href="index.html" class="hy_home">← 返回首页</a>
+  <span class="hy_info">HY · ZOOM · PINCH</span>
+</div>
+
+<div class="hy_scale_badge" id="hy_scaleBadge">1.0x</div>
+
+<div class="hy_viewer" id="hy_viewer">
+  <img class="hy_img" id="hy_img" src="https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/5.jpg" alt="查看图片">
+</div>
+
+<div class="hy_hint">
+  <b>👆 双指</b>缩放 · <b>双击</b> 1x/2x 切换 · <b>单指拖动</b>放大后看细节 · <b>缩回 1x</b> 自动居中
+</div>
+
+<script>
+/* ===== hy_state =====
+ * 全局缩放 + 拖动状态（hy_ 前缀统一）
+ */
+const hy_state = {
+  // 缩放
+  scale: 1,          // 当前缩放倍数（1x~4x）
+  minScale: 1,
+  maxScale: 4,
+
+  // 平移（图片左上角相对容器左上角的偏移）
+  tx: 0,
+  ty: 0,
+
+  // 图片原始尺寸
+  imgNaturalW: 0,
+  imgNaturalH: 0,
+  // 容器尺寸
+  viewW: 0,
+  viewH: 0,
+
+  // 图片在 1x 时的显示尺寸（object-fit: contain 计算后）
+  baseW: 0,
+  baseH: 0,
+
+  // 触摸追踪
+  touches: [],       // 当前活动触摸点（最多 2 个）
+  lastDist: 0,       // 上一次两指距离
+  lastMidX: 0,       // 上一次两指中点 X（用于锁定缩放中心不"跳走"）
+  lastMidY: 0,       // 上一次两指中点 Y
+
+  // 单击拖动
+  isDragging: false,
+  lastSingleX: 0,
+  lastSingleY: 0,
+
+  // 双击检测
+  lastTapTime: 0,
+  lastTapX: 0,
+  lastTapY: 0,
+
+  // 动画中（双击/缩放边界回弹时锁输入）
+  isAnimating: false
+};
+
+/* ===== hy_getPoints =====
+ * 功能: 从 TouchEvent 提取活动触摸点坐标数组
+ * 参数: touches - e.touches 或 e.changedTouches
+ * 返回: Array<{id,x,y}>
+ */
+function hy_getPoints(touches) {
+  const pts = [];
+  for (let i = 0; i < touches.length; i++) {
+    pts.push({ id: touches[i].identifier, x: touches[i].clientX, y: touches[i].clientY });
+  }
+  return pts;
+}
+
+/* ===== hy_distance =====
+ * 功能: 计算两点距离
+ * 参数: a, b - {x, y}
+ * 返回: number
+ */
+function hy_distance(a, b) {
+  const dx = a.x - b.x, dy = a.y - b.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+/* ===== hy_midpoint =====
+ * 功能: 计算两点中点
+ * 参数: a, b - {x, y}
+ * 返回: {x, y}
+ */
+function hy_midpoint(a, b) {
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
+/* ===== hy_applyTransform =====
+ * 功能: 把 scale / tx / ty 应用到图片上（含边界钳制）
+ * 参数: opts - { animate: boolean } 是否用过渡动画
+ * 返回: 无
+ */
+function hy_applyTransform(opts) {
+  const img = document.getElementById('hy_img');
+  if (opts && opts.animate) img.style.transition = '';   // 开过渡
+  else                      img.style.transition = 'none';  // 无过渡（跟手拖动时）
+
+  // 边界钳制（核心：让图片缩小时"自动回到边界内"，保证 1x 不越界）
+  hy_clampTranslate();
+
+  img.style.transform = 'translate(' + hy_state.tx + 'px,' + hy_state.ty + 'px) scale(' + hy_state.scale + ')';
+
+  // 更新缩放指示器
+  hy_updateBadge();
+}
+
+/* ===== hy_clampTranslate =====
+ * 功能: 把 tx / ty 钳制在合法范围内
+ *       图片缩放后尺寸 = baseW*scale × baseH*scale
+ *       为了让图片始终"覆盖容器"（没有任何空白露出来），平移范围：
+ *         tx ∈ [-(baseW*scale - viewW), 0]      ← 图片比容器大时才能拖
+ *         tx = (viewW - baseW*scale)/2           ← 图片比容器小时强制居中
+ *       ty 同理
+ * 参数: 无
+ * 返回: 无（直接改 hy_state.tx/ty）
+ */
+function hy_clampTranslate() {
+  const s = hy_state;
+  const scaledW = s.baseW * s.scale;
+  const scaledH = s.baseH * s.scale;
+
+  if (scaledW <= s.viewW) {
+    // 图片比容器窄 → 强制水平居中（不允许拖出空白）
+    s.tx = (s.viewW - scaledW) / 2;
+  } else {
+    // 图片比容器宽 → 限制边界
+    const maxTx = 0;
+    const minTx = s.viewW - scaledW;
+    if (s.tx > maxTx) s.tx = maxTx;
+    if (s.tx < minTx) s.tx = minTx;
+  }
+
+  if (scaledH <= s.viewH) {
+    s.ty = (s.viewH - scaledH) / 2;
+  } else {
+    const maxTy = 0;
+    const minTy = s.viewH - scaledH;
+    if (s.ty > maxTy) s.ty = maxTy;
+    if (s.ty < minTy) s.ty = minTy;
+  }
+}
+
+/* ===== hy_updateBadge =====
+ * 功能: 更新缩放比例指示器（显示 1.0x ~ 4.0x）
+ * 参数: 无
+ * 返回: 无
+ */
+let hy_badgeTimer = null;
+function hy_updateBadge() {
+  const badge = document.getElementById('hy_scaleBadge');
+  badge.textContent = hy_state.scale.toFixed(1) + 'x';
+  badge.classList.add('hy_show');
+  if (hy_badgeTimer) clearTimeout(hy_badgeTimer);
+  hy_badgeTimer = setTimeout(function() { badge.classList.remove('hy_show'); }, 1200);
+}
+
+/* ===== hy_initImage =====
+ * 功能: 图片加载完成后，计算 baseW / baseH（contain 适配容器），设置初始居中位置
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_initImage() {
+  const img = document.getElementById('hy_img');
+  const viewer = document.getElementById('hy_viewer');
+
+  hy_state.viewW = viewer.clientWidth;
+  hy_state.viewH = viewer.clientHeight;
+  hy_state.imgNaturalW = img.naturalWidth;
+  hy_state.imgNaturalH = img.naturalHeight;
+
+  // contain 适配：按较小比例缩放，让图片完整显示在容器内
+  const ratioW = hy_state.viewW / hy_state.imgNaturalW;
+  const ratioH = hy_state.viewH / hy_state.imgNaturalH;
+  const containRatio = Math.min(ratioW, ratioH);
+  hy_state.baseW = hy_state.imgNaturalW * containRatio;
+  hy_state.baseH = hy_state.imgNaturalH * containRatio;
+
+  // 初始 1x 居中
+  hy_state.scale = 1;
+  hy_state.tx = (hy_state.viewW - hy_state.baseW) / 2;
+  hy_state.ty = (hy_state.viewH - hy_state.baseH) / 2;
+
+  // 图片 DOM 尺寸设为 baseW × baseH（transform-origin:0 0 基于此缩放）
+  img.style.width = hy_state.baseW + 'px';
+  img.style.height = hy_state.baseH + 'px';
+
+  hy_applyTransform({ animate: true });
+}
+
+/* ===== hy_pinch =====
+ * 功能: 两指触摸 —— 以两指中点为缩放中心（关键：防止"跳走"）
+ * 算法: 记录上次两指距离 dist1 + 上次中点 (midX, midY)
+ *       新 dist2 → scaleFactor = dist2/dist1
+ *       newScale = clamp(oldScale * scaleFactor)
+ *       把中点 (midX, midY) 锚定在图片上的同一物理位置 → 反推 tx/ty
+ * 参数: 无（读 hy_state.touches）
+ * 返回: 无
+ */
+function hy_pinch() {
+  if (hy_state.touches.length !== 2) return;
+
+  const p0 = hy_state.touches[0];
+  const p1 = hy_state.touches[1];
+  const dist = hy_distance(p0, p1);
+  const mid = hy_midpoint(p0, p1);
+
+  if (hy_state.lastDist === 0) {
+    // 第一次进入双指模式：记录当前状态作为锚点
+    hy_state.lastDist = dist;
+    hy_state.lastMidX = mid.x;
+    hy_state.lastMidY = mid.y;
+    return;
+  }
+
+  // 缩放因子
+  const factor = dist / hy_state.lastDist;
+  let newScale = hy_state.scale * factor;
+  // 钳制 1x ~ 4x
+  if (newScale < hy_state.minScale) newScale = hy_state.minScale;
+  if (newScale > hy_state.maxScale)  newScale = hy_state.maxScale;
+
+  // 🔑 关键：锁定中点不"跳走"
+  // 中点在图片坐标系（左上角为原点）的位置 = (midX - tx) / oldScale
+  // 新 scale 下，要让图片物理位置不变：
+  //   newTx = midX - (midX - oldTx) * (newScale / oldScale)
+  const sx = hy_state.lastMidX;
+  const sy = hy_state.lastMidY;
+  const oldScale = hy_state.scale;
+
+  // 中点在"当前图片坐标系"中的位置（图片缩放后以左上角为 0,0）
+  const imgCoordX = (sx - hy_state.tx) / oldScale;
+  const imgCoordY = (sy - hy_state.ty) / oldScale;
+
+  // 新 scale 下，图片必须让 (imgCoordX, imgCoordY) 还在屏幕 (sx, sy) 位置
+  // newTx = sx - imgCoordX * newScale
+  const newTx = sx - imgCoordX * newScale;
+  const newTy = sy - imgCoordY * newScale;
+
+  hy_state.scale = newScale;
+  hy_state.tx = newTx;
+  hy_state.ty = newTy;
+
+  hy_state.lastDist = dist;
+  hy_state.lastMidX = mid.x;
+  hy_state.lastMidY = mid.y;
+
+  hy_applyTransform({ animate: false });
+}
+
+/* ===== hy_drag =====
+ * 功能: 单指拖动放大后的图片（仅当 scale > 1 时生效）
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_drag() {
+  if (hy_state.touches.length !== 1 || hy_state.scale <= 1) return;
+  const p = hy_state.touches[0];
+  const dx = p.x - hy_state.lastSingleX;
+  const dy = p.y - hy_state.lastSingleY;
+  hy_state.tx += dx;
+  hy_state.ty += dy;
+  hy_state.lastSingleX = p.x;
+  hy_state.lastSingleY = p.y;
+  hy_applyTransform({ animate: false });
+}
+
+/* ===== hy_onTouchStart =====
+ * 功能: 触摸开始 — 记录活动触摸点 + 双击检测
+ * 参数: e - TouchEvent
+ * 返回: 无
+ */
+function hy_onTouchStart(e) {
+  e.preventDefault();
+  hy_state.touches = hy_getPoints(e.touches);
+
+  if (hy_state.touches.length === 2) {
+    // 双指模式：重置 pinch 锚点
+    hy_state.lastDist = 0;
+  } else if (hy_state.touches.length === 1) {
+    const p = hy_state.touches[0];
+    hy_state.lastSingleX = p.x;
+    hy_state.lastSingleY = p.y;
+    // 双击检测（间隔 < 280ms 且位置差 < 20px）
+    const now = Date.now();
+    if (now - hy_state.lastTapTime < 280
+        && Math.abs(p.x - hy_state.lastTapX) < 20
+        && Math.abs(p.y - hy_state.lastTapY) < 20) {
+      hy_doDoubleTap();
+    }
+    hy_state.lastTapTime = now;
+    hy_state.lastTapX = p.x;
+    hy_state.lastTapY = p.y;
+  }
+}
+
+/* ===== hy_doDoubleTap =====
+ * 功能: 双击 — 在 1x 和 2x 之间切换，带 0.25s 过渡
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_doDoubleTap() {
+  hy_state.isAnimating = true;
+
+  if (hy_state.scale > 1.01) {
+    // 放大中 → 缩回 1x（自动居中）
+    hy_state.scale = 1;
+    hy_state.tx = (hy_state.viewW - hy_state.baseW) / 2;
+    hy_state.ty = (hy_state.viewH - hy_state.baseH) / 2;
+  } else {
+    // 1x → 放大到 2x，放大中心 = 双击点
+    const tapX = hy_state.lastTapX;
+    const tapY = hy_state.lastTapY;
+    const imgCoordX = (tapX - hy_state.tx) / hy_state.scale;  // 在 1x 图片上的坐标
+    const imgCoordY = (tapY - hy_state.ty) / hy_state.scale;
+    hy_state.scale = 2;
+    hy_state.tx = tapX - imgCoordX * hy_state.scale;
+    hy_state.ty = tapY - imgCoordY * hy_state.scale;
+  }
+
+  hy_applyTransform({ animate: true });
+  setTimeout(function() { hy_state.isAnimating = false; }, 260);
+}
+
+/* ===== hy_onTouchMove =====
+ * 功能: 触摸移动 — 分发到 pinch 或 drag
+ * 参数: e - TouchEvent
+ * 返回: 无
+ */
+function hy_onTouchMove(e) {
+  e.preventDefault();
+  if (hy_state.isAnimating) return;
+  hy_state.touches = hy_getPoints(e.touches);
+
+  if (hy_state.touches.length === 2) hy_pinch();
+  else if (hy_state.touches.length === 1) hy_drag();
+}
+
+/* ===== hy_onTouchEnd =====
+ * 功能: 触摸结束 — 清理状态 + 1x 时自动居中
+ * 参数: e - TouchEvent
+ * 返回: 无
+ */
+function hy_onTouchEnd(e) {
+  e.preventDefault();
+  const remaining = hy_getPoints(e.touches);
+  hy_state.touches = remaining;
+
+  // 1x 状态 → 强制居中（保证旋转屏幕不丢状态）
+  if (hy_state.scale <= 1.01) {
+    hy_state.scale = 1;
+    hy_state.tx = (hy_state.viewW - hy_state.baseW) / 2;
+    hy_state.ty = (hy_state.viewH - hy_state.baseH) / 2;
+    hy_applyTransform({ animate: true });
+  }
+
+  // 双指松开变成单指：重置锚点
+  if (remaining.length === 1) {
+    hy_state.lastSingleX = remaining[0].x;
+    hy_state.lastSingleY = remaining[0].y;
+    hy_state.lastDist = 0;
+  } else if (remaining.length === 0) {
+    hy_state.lastDist = 0;
+  }
+}
+
+/* ===== hy_onResize =====
+ * 功能: 窗口大小变化（旋转屏幕） → 重新计算容器尺寸 + 重钳制位置
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_onResize() {
+  const viewer = document.getElementById('hy_viewer');
+  hy_state.viewW = viewer.clientWidth;
+  hy_state.viewH = viewer.clientHeight;
+
+  // 旋转时图片 baseW/baseH 不变，但 viewW/viewH 变了
+  // 重新钳制平移即可，保持 scale 不变
+  hy_applyTransform({ animate: false });
+}
+
+/* ===== hy_init =====
+ * 功能: 初始化 — 图片 load 后计算尺寸 + 绑定全部事件
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_init() {
+  const img = document.getElementById('hy_img');
+  // 图片可能已缓存，complete 检查避免重复 load 绑定
+  if (img.complete && img.naturalWidth > 0) {
+    hy_initImage();
+  } else {
+    img.addEventListener('load', hy_initImage);
+  }
+
+  const viewer = document.getElementById('hy_viewer');
+  viewer.addEventListener('touchstart', hy_onTouchStart, { passive: false });
+  viewer.addEventListener('touchmove',  hy_onTouchMove,  { passive: false });
+  viewer.addEventListener('touchend',   hy_onTouchEnd,  { passive: false });
+  window.addEventListener('resize', hy_onResize);
+}
+
+document.addEventListener('DOMContentLoaded', hy_init);
+</script>
+
+</body>
+</html>

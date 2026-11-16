@@ -155,3 +155,20 @@ swiper-vertical.html — 左右并排对比两轮产出，同样的 nature 图�
   - 搜索框 input 事件实时过滤 + 按标题长度排序按钮三级切换（任务三）
   - 自动匹配诗词 → 作者（通过 works 数组匹配标题）
   - CORS Access-Control-Allow-Origin: * 跨域放行
+
+---
+
+**时间**：2026-11-16  
+**模型**：Trae  
+**提示词**：
+
+课堂任务二三四（移动端手势与传感器）：
+- 任务二 ⭐⭐ mobile-gesture.html：手势卡片，4 道菜，左右滑动切换，阈值 40px，0.3s 过渡，边界提示
+- 任务三 ⭐⭐⭐ mobile-zoom.html：图片查看器，双指 pinch（1x~4x）+ 双击 1x/2x + 放大后拖动，缩放中心锁定不"跳走"
+- 任务四 ⭐⭐⭐⭐ mobile-sensor.html：摇一摇彩蛋，deviceMotion accelerationIncludingGravity 阈值 18，1.5s 冷却，iOS 权限申请，降级按钮
+
+#### 实现
+- 统一前缀 hy_（课堂要求）
+- mobile-gesture.html：touchstart/move/end + 阈值 40px + track translateX + touch-action:pan-y
+- mobile-zoom.html：pinch 算法（两指距离比值 + 中点锁定公式 `newTx = midX - imgCoordX * newScale`）+ 边界钳制
+- mobile-sensor.html：hy_computeAcceleration 计算 sqrt(x²+y²+z²) + 冷却窗口 accelerationIncludingGravity vs acceleration

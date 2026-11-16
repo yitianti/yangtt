@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<!--
+  作者: 杨婷婷
+  建立时间: 2026-11-16
+  使用模型: Trae
+  功能名称: 手势卡片 — 左右滑动切换内容（课堂任务二 ⭐⭐）
+  功能简介: 一张美食卡片，共 4 道菜。左滑到下一道、右滑到上一道。
+           滑动距离 >= 阈值(40px) 才切换，快速连续滑动不会跳两张。
+           卡片切换带 0.3s 过渡动画。
+           边界（第一道右滑 / 最后一道左滑）有提示文字。
+           手机上拖动时页面不会跟着上下滚动（touch-action: pan-y）。
+           变量 / id / class 统一 hy_ 开头。
+-->
+<title>手势卡片 · 左右滑动切换</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#2c1810,#4a2c1a);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:30px 16px 50px;color:#fff;
+    touch-action:none;
+  }
+  .hy_top{width:100%;max-width:420px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .hy_home{color:#f5c98f;text-decoration:none;font-size:13px;}
+  .hy_home:hover{color:#ffd97a;}
+  .hy_sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#a67c52;letter-spacing:.1em;}
+  .hy_title{text-align:center;margin-bottom:22px;}
+  .hy_title h1{font-size:20px;color:#ffd97a;letter-spacing:3px;margin-bottom:4px;}
+  .hy_title p{font-size:12px;color:#a67c52;}
+
+  .hy_window{
+    width:320px;height:420px;border-radius:20px;overflow:hidden;position:relative;
+    background:#1a0f08;box-shadow:0 20px 50px rgba(0,0,0,.5);
+    touch-action:pan-y;       /* 允许纵向，禁止横向——关键！ */
+  }
+  .hy_track{
+    position:absolute;top:0;left:0;height:100%;display:flex;
+    transition:transform .3s cubic-bezier(.25,.46,.45,.94);
+    will-change:transform;
+  }
+  .hy_card{flex-shrink:0;width:320px;height:420px;position:relative;overflow:hidden;}
+  .hy_card_img{width:100%;height:220px;object-fit:cover;display:block;}
+  .hy_card_body{padding:18px 20px;background:linear-gradient(180deg,rgba(26,15,8,0),#1a0f08 30%);position:absolute;bottom:0;left:0;right:0;padding-top:60px;}
+  .hy_card_name{font-size:22px;font-weight:700;color:#ffd97a;margin-bottom:4px;letter-spacing:1px;}
+  .hy_card_tag{font-size:11px;color:#a67c52;margin-bottom:10px;letter-spacing:.2em;}
+  .hy_card_intro{font-size:13px;color:#d4b896;line-height:1.7;}
+  .hy_card_price{position:absolute;top:228px;right:16px;background:#c8452e;color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+
+  .hy_indicator{display:flex;justify-content:center;gap:8px;margin-top:18px;}
+  .hy_dot{width:8px;height:8px;border-radius:50%;background:rgba(255,217,122,.3);transition:all .3s;}
+  .hy_dot.hy_dot_active{width:22px;border-radius:4px;background:#ffd97a;}
+
+  .hy_edge_msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:10;}
+  .hy_edge_msg.hy_show{opacity:1;}
+  .hy_hint{margin-top:28px;font-size:12px;color:#a67c52;text-align:center;line-height:1.8;max-width:320px;}
+</style>
+</head>
+<body>
+
+<div class="hy_top">
+  <a href="index.html" class="hy_home">← 返回首页</a>
+  <span class="hy_sub">HY · GESTURE · SWIPE</span>
+</div>
+
+<div class="hy_title">
+  <h1>🍜 今日美食 · 四道菜</h1>
+  <p>← 右滑看上一道 · 左滑看下一道 →</p>
+</div>
+
+<div class="hy_window" id="hy_window">
+  <div class="hy_track" id="hy_track"></div>
+  <div class="hy_edge_msg" id="hy_edgeMsg"></div>
+</div>
+
+<div class="hy_indicator" id="hy_indicator"></div>
+
+<div class="hy_hint">
+  ✅ 短距离误触不会切换（阈值 40px）<br>
+  ✅ 快速连续滑动不会跳两张<br>
+  ✅ 边界提示 + 0.3s 过渡动画
+</div>
+
+<script>
+/* ===== 四道菜数据 ===== */
+const HY_DISHES = [
+  { name:'红烧肉',    price:'¥38', tag:'家常经典', intro:'肥而不腻，入口即化。五花肉配冰糖酱油小火慢炖三小时，色泽红亮，肉香四溢。', img:'https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/6.jpg' },
+  { name:'宫保鸡丁',  price:'¥28', tag:'川菜代表', intro:'鸡丁滑嫩，花生酥脆。干辣椒与花椒的麻辣混合酸甜酱汁，经典川菜一口上瘾。', img:'https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/2.jpg' },
+  { name:'麻婆豆腐',  price:'¥22', tag:'下饭神器', intro:'麻辣鲜香，豆腐嫩滑。红油豆瓣打底，嫩豆腐烫煮后撒花椒粉，一碗不够再来一碗。', img:'https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/3.jpg' },
+  { name:'清蒸鲈鱼',  price:'¥48', tag:'粤菜精品', intro:'鱼鲜肉嫩，原汁原味。姜片葱段打底蒸 8 分钟，淋上热油激发葱姜香气。', img:'https://gitee.com/wangyao_jsj/project2024_01/raw/master/img/4.jpg' }
+];
+
+/* ===== hy_state ===== */
+const hy_state = {
+  index: 0,
+  total: HY_DISHES.length,
+  cardWidth: 320,
+  isAnimating: false,
+  touchStartX: 0, touchStartY: 0,
+  currentTranslate: 0,
+  isTracking: false
+};
+
+/* ===== hy_buildCards =====
+ * 功能: 构建卡片 DOM + 指示器圆点
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_buildCards() {
+  const track = document.getElementById('hy_track');
+  const indicator = document.getElementById('hy_indicator');
+  HY_DISHES.forEach(function(dish, i) {
+    const card = document.createElement('div');
+    card.className = 'hy_card';
+    card.innerHTML = '<img class="hy_card_img" src="' + dish.img + '" alt="' + dish.name + '">'
+      + '<span class="hy_card_price">' + dish.price + '</span>'
+      + '<div class="hy_card_body"><div class="hy_card_name">' + dish.name + '</div>'
+      + '<div class="hy_card_tag">' + dish.tag + '</div><div class="hy_card_intro">' + dish.intro + '</div></div>';
+    track.appendChild(card);
+    const dot = document.createElement('div');
+    dot.className = 'hy_dot';
+    if (i === 0) dot.classList.add('hy_dot_active');
+    indicator.appendChild(dot);
+  });
+  track.style.transform = 'translateX(0)';
+}
+
+/* ===== hy_updateIndicator =====
+ * 功能: 更新圆点状态
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_updateIndicator() {
+  const dots = document.querySelectorAll('.hy_dot');
+  dots.forEach(function(d, i) {
+    if (i === hy_state.index) d.classList.add('hy_dot_active');
+    else d.classList.remove('hy_dot_active');
+  });
+}
+
+/* ===== hy_showEdge =====
+ * 功能: 边界提示（1.2s 自动隐藏）
+ * 参数: msg - 提示文字
+ * 返回: 无
+ */
+let hy_edgeTimer = null;
+function hy_showEdge(msg) {
+  const el = document.getElementById('hy_edgeMsg');
+  el.textContent = msg;
+  el.classList.add('hy_show');
+  if (hy_edgeTimer) clearTimeout(hy_edgeTimer);
+  hy_edgeTimer = setTimeout(function() { el.classList.remove('hy_show'); }, 1200);
+}
+
+/* ===== hy_switchTo =====
+ * 功能: 切换卡片（带 0.3s 过渡）
+ * 参数: newIndex
+ * 返回: 无
+ */
+function hy_switchTo(newIndex) {
+  if (newIndex < 0) { hy_showEdge('⚠️ 已经是第一张啦'); return; }
+  if (newIndex >= hy_state.total) { hy_showEdge('⚠️ 已经是最后一张啦'); return; }
+  hy_state.index = newIndex;
+  hy_state.isAnimating = true;
+  const track = document.getElementById('hy_track');
+  track.style.transform = 'translateX(-' + (hy_state.index * hy_state.cardWidth) + 'px)';
+  hy_updateIndicator();
+  setTimeout(function() { hy_state.isAnimating = false; }, 320);
+}
+
+/* ===== hy_onTouchStart ===== */
+function hy_onTouchStart(e) {
+  if (hy_state.isAnimating) return;
+  const t = e.touches[0];
+  hy_state.touchStartX = t.clientX;
+  hy_state.touchStartY = t.clientY;
+  hy_state.isTracking = true;
+  hy_state.currentTranslate = -hy_state.index * hy_state.cardWidth;
+  document.getElementById('hy_track').style.transition = 'none';
+}
+
+/* ===== hy_onTouchMove ===== */
+function hy_onTouchMove(e) {
+  if (!hy_state.isTracking || hy_state.isAnimating) return;
+  const t = e.touches[0];
+  const dx = t.clientX - hy_state.touchStartX;
+  const dy = t.clientY - hy_state.touchStartY;
+  if (Math.abs(dy) > Math.abs(dx)) return;   // 纵向 > 横向 → 让浏览器滚
+  document.getElementById('hy_track').style.transform =
+    'translateX(' + (hy_state.currentTranslate + dx) + 'px)';
+}
+
+/* ===== hy_onTouchEnd ===== */
+function hy_onTouchEnd(e) {
+  if (!hy_state.isTracking) return;
+  hy_state.isTracking = false;
+  const ct = e.changedTouches[0];
+  const dx = ct.clientX - hy_state.touchStartX;
+  const dy = ct.clientY - hy_state.touchStartY;
+  const track = document.getElementById('hy_track');
+  track.style.transition = '';
+  if (Math.abs(dy) > Math.abs(dx)) return;
+  const threshold = 40;
+  if (Math.abs(dx) < threshold) {
+    track.style.transform = 'translateX(-' + (hy_state.index * hy_state.cardWidth) + 'px)';
+    return;
+  }
+  if (dx < 0) hy_switchTo(hy_state.index + 1);
+  else        hy_switchTo(hy_state.index - 1);
+}
+
+/* ===== hy_init ===== */
+function hy_init() {
+  hy_buildCards();
+  const win = document.getElementById('hy_window');
+  win.addEventListener('touchstart', hy_onTouchStart, { passive: true });
+  win.addEventListener('touchmove',  hy_onTouchMove,  { passive: true });
+  win.addEventListener('touchend',   hy_onTouchEnd);
+  // 桌面鼠标模拟
+  let md = false;
+  win.addEventListener('mousedown', function(e) {
+    md = true; hy_onTouchStart({ touches:[{clientX:e.clientX,clientY:e.clientY}] });
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!md) return;
+    hy_onTouchMove({ touches:[{clientX:e.clientX,clientY:e.clientY}] });
+  });
+  window.addEventListener('mouseup', function(e) {
+    if (!md) return; md = false;
+    hy_onTouchEnd({ changedTouches:[{clientX:e.clientX,clientY:e.clientY}] });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', hy_init);
+</script>
+</body>
+</html>

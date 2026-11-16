@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<!--
+  作者: 杨婷婷
+  建立时间: 2026-11-16
+  使用模型: Trae
+  功能名称: 摇一摇彩蛋 — 抽取今日菜谱（课堂任务四 ⭐⭐⭐⭐）
+  功能简介:
+    ① 监听 deviceMotion，取 accelerationIncludingGravity 计算合成加速度
+    ② 超过阈值（约 18）判定为摇动，触发后 1.5s 冷却
+    ③ 随机抽取一道菜，简单弹出动画显示
+    ④ 设备不支持时显示"当前设备不支持"，提供"点我抽一次"降级按钮
+    ⑤ iOS 上需要按钮触发权限申请（requestPermission）
+    变量 / id / class 统一 hy_ 开头。
+-->
+<title>摇一摇 · 今日菜谱</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(ellipse at center,#3a1a0a 0%,#1a0804 100%);
+    color:#fff;text-align:center;
+    touch-action:none;
+    display:flex;flex-direction:column;align-items:center;
+  }
+
+  /* ===== 顶部导航 ===== */
+  .hy_top{width:100%;max-width:420px;margin-top:18px;padding:0 16px;display:flex;justify-content:space-between;align-items:center;}
+  .hy_home{color:#ffd97a;text-decoration:none;font-size:13px;}
+  .hy_sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#a67c52;letter-spacing:.1em;}
+
+  /* ===== 标题 ===== */
+  .hy_title{margin-top:30px;margin-bottom:20px;}
+  .hy_title h1{font-size:24px;color:#ffd97a;letter-spacing:4px;margin-bottom:6px;}
+  .hy_title p{font-size:12px;color:#a67c52;}
+
+  /* ===== 摇一摇容器 ===== */
+  .hy_shake_box{
+    width:240px;height:240px;border-radius:50%;margin:30px auto;
+    background:radial-gradient(circle at 30% 30%,#5a3520,#2c1810);
+    border:3px solid #c8452e;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:relative;cursor:pointer;user-select:none;
+    box-shadow:0 0 60px rgba(200,69,46,.4),inset 0 0 40px rgba(0,0,0,.4);
+    transition:transform .1s;
+  }
+  .hy_shake_box.hy_shaking{animation:hy_shake .5s cubic-bezier(.36,.07,.19,.97) both;}
+  @keyframes hy_shake{
+    10%,90%{transform:translate3d(-2px,0,0) rotate(-3deg);}
+    20%,80%{transform:translate3d(4px,0,0) rotate(2deg);}
+    30%,50%,70%{transform:translate3d(-8px,0,0) rotate(-5deg);}
+    40%,60%{transform:translate3d(8px,0,0) rotate(5deg);}
+  }
+  .hy_shake_icon{font-size:56px;margin-bottom:8px;}
+  .hy_shake_label{font-size:14px;color:#ffd97a;letter-spacing:2px;}
+  .hy_shake_sub{font-size:11px;color:#a67c52;margin-top:4px;}
+
+  /* ===== 冷却遮罩 ===== */
+  .hy_cooldown{
+    position:absolute;inset:0;border-radius:50%;
+    background:rgba(0,0,0,.6);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;letter-spacing:2px;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .hy_cooldown.hy_show{opacity:1;}
+
+  /* ===== 结果弹窗 ===== */
+  .hy_result_mask{
+    position:fixed;inset:0;background:rgba(0,0,0,.65);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .3s;z-index:20;
+  }
+  .hy_result_mask.hy_show{opacity:1;pointer-events:auto;}
+  .hy_result_box{
+    background:#fff;border-radius:20px;padding:28px 32px;max-width:320px;width:86%;
+    color:#1a0804;text-align:center;transform:scale(.7);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .hy_result_mask.hy_show .hy_result_box{transform:scale(1);}
+  .hy_result_icon{font-size:52px;margin-bottom:8px;}
+  .hy_result_tag{font-size:11px;color:#a67c52;letter-spacing:.3em;margin-bottom:6px;}
+  .hy_result_name{font-size:26px;font-weight:700;color:#c8452e;margin-bottom:4px;}
+  .hy_result_price{font-size:14px;color:#5a3520;margin-bottom:12px;}
+  .hy_result_intro{font-size:13px;color:#3d2914;line-height:1.8;margin-bottom:18px;}
+  .hy_result_btn{
+    background:#c8452e;color:#fff;border:none;padding:10px 30px;
+    border-radius:999px;font-size:13px;font-family:inherit;cursor:pointer;letter-spacing:2px;
+  }
+
+  /* ===== 降级面板（设备不支持时显示）===== */
+  .hy_fallback{
+    margin-top:24px;max-width:320px;padding:18px 22px;
+    background:rgba(200,69,46,.1);border:1px solid rgba(200,69,46,.3);
+    border-radius:12px;display:none;
+  }
+  .hy_fallback.hy_show{display:block;}
+  .hy_fallback h3{font-size:14px;color:#ffd97a;margin-bottom:6px;}
+  .hy_fallback p{font-size:12px;color:#a67c52;margin-bottom:12px;line-height:1.7;}
+  .hy_fallback_btn{
+    background:#c8452e;color:#fff;border:none;padding:10px 24px;
+    border-radius:999px;font-size:13px;font-family:inherit;cursor:pointer;letter-spacing:1px;
+  }
+  .hy_fallback_btn:active{background:#a63a27;}
+
+  /* ===== iOS 权限按钮 ===== */
+  .hy_ios_btn{
+    margin-top:16px;background:#3a6ea5;color:#fff;border:none;padding:10px 24px;
+    border-radius:999px;font-size:13px;font-family:inherit;cursor:pointer;letter-spacing:1px;
+    display:none;
+  }
+  .hy_ios_btn.hy_show{display:inline-block;}
+  .hy_ios_btn:active{background:#2c5364;}
+
+  /* ===== 说明 ===== */
+  .hy_hint{margin-top:28px;font-size:11.5px;color:#a67c52;line-height:1.9;max-width:320px;}
+  .hy_hint b{color:#ffd97a;}
+  .hy_hint code{background:rgba(255,217,122,.1);padding:1px 6px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="hy_top">
+  <a href="index.html" class="hy_home">← 返回首页</a>
+  <span class="hy_sub">HY · SENSOR · SHAKE</span>
+</div>
+
+<div class="hy_title">
+  <h1>🍽️ 摇一摇 · 今日菜谱</h1>
+  <p>摇一摇手机，随机为你抽一道菜</p>
+</div>
+
+<div class="hy_shake_box" id="hy_shakeBox">
+  <div class="hy_shake_icon">📱</div>
+  <div class="hy_shake_label">摇一摇</div>
+  <div class="hy_shake_sub">或点我抽一次</div>
+  <div class="hy_cooldown" id="hy_cooldown">冷却中</div>
+</div>
+
+<div class="hy_fallback" id="hy_fallback">
+  <h3>⚠️ 当前设备不支持</h3>
+  <p>没有加速传感器。没关系——点下面的按钮也能抽！</p>
+  <button class="hy_fallback_btn" onclick="hy_doShake('fallback')">🎲 点我抽一次</button>
+</div>
+
+<button class="hy_ios_btn" id="hy_iosBtn" onclick="hy_requestPermission()">📱 开启陀螺仪权限</button>
+
+<div class="hy_hint">
+  <b>💡 iOS 用户</b>：Safari 13+ 需点击按钮授权陀螺仪权限<br>
+  <b>阈值 18</b> · <b>冷却 1.5s</b> · <b>random 从 4 道菜里抽</b>
+</div>
+
+<!-- 结果弹窗 -->
+<div class="hy_result_mask" id="hy_mask">
+  <div class="hy_result_box">
+    <div class="hy_result_icon" id="hy_resultIcon">🍜</div>
+    <div class="hy_result_tag">今日推荐</div>
+    <div class="hy_result_name" id="hy_resultName">—</div>
+    <div class="hy_result_price" id="hy_resultPrice">—</div>
+    <div class="hy_result_intro" id="hy_resultIntro">—</div>
+    <button class="hy_result_btn" onclick="hy_closeResult()">好嘞！</button>
+  </div>
+</div>
+
+<script>
+/* ===== 今日菜谱数据 ===== */
+const HY_DISHES = [
+  { name:'红烧肉',    price:'¥38', tag:'家常经典', icon:'🥩', intro:'肥而不腻，入口即化。五花肉配冰糖酱油小火慢炖三小时，色泽红亮，肉香四溢。' },
+  { name:'宫保鸡丁',  price:'¥28', tag:'川菜代表', icon:'🍗', intro:'鸡丁滑嫩，花生酥脆。干辣椒与花椒的麻辣混合酸甜酱汁，经典川菜一口上瘾。' },
+  { name:'麻婆豆腐',  price:'¥22', tag:'下饭神器', icon:'🧆', intro:'麻辣鲜香，豆腐嫩滑。红油豆瓣打底，嫩豆腐烫煮后撒花椒粉，一碗不够再来一碗。' },
+  { name:'清蒸鲈鱼',  price:'¥48', tag:'粤菜精品', icon:'🐟', intro:'鱼鲜肉嫩，原汁原味。姜片葱段打底蒸 8 分钟，淋上热油激发葱姜香气。' }
+];
+
+/* ===== hy_state =====
+ * 全局状态（hy_ 前缀）
+ */
+const hy_state = {
+  cooldownEnd: 0,          // 冷却结束时间戳（0 = 无冷却）
+  shakeThreshold: 18,      // 合成加速度阈值
+  cooldownMs: 1500,        // 冷却 1.5s
+  lastShakeMag: 0,         // 最近一次摇动的合成加速度（调试用）
+  isIOS: false,            // 是否 iOS
+  motionSupported: false   // deviceMotion 是否可用
+};
+
+/* ===== hy_isIOS =====
+ * 功能: 判断是否 iOS 设备（iOS 13+ Safari 需要手动授权）
+ * 参数: 无
+ * 返回: boolean
+ */
+function hy_isIOS() {
+  return /iPhone|iPad|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+/* ===== hy_requestPermission =====
+ * 功能: iOS 上点击按钮请求 deviceMotion 权限
+ * 参数: 无
+ * 返回: Promise
+ */
+function hy_requestPermission() {
+  if (typeof DeviceMotionEvent !== 'undefined'
+      && typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission()
+      .then(function(state) {
+        if (state === 'granted') {
+          hy_state.motionSupported = true;
+          document.getElementById('hy_iosBtn').classList.remove('hy_show');
+          hy_startMotionListener();
+          hy_showFallback(false);
+        } else {
+          alert('权限被拒绝啦，陀螺仪无法使用。你可以点"点我抽一次"按钮代替～');
+        }
+      })
+      .catch(function(err) {
+        console.warn('requestPermission 失败:', err);
+      });
+  }
+}
+
+/* ===== hy_computeAcceleration =====
+ * 功能: 从 deviceMotionEvent 计算合成加速度向量长度
+ *       accelerationIncludingGravity = 真实加速度 + 重力
+ *       acceleration（部分平台有）= 真实加速度（不含重力）
+ *       合成 = sqrt(x² + y² + z²)
+ * 参数: e - DeviceMotionEvent
+ * 返回: number（如果取不到返回 null）
+ */
+function hy_computeAcceleration(e) {
+  // 优先 acceleration（不含重力，约 0.98g 以下就是静止）
+  let acc = e.acceleration || e.accelerationIncludingGravity;
+  if (!acc) return null;
+
+  // 某些字段可能为 null
+  const x = acc.x || 0, y = acc.y || 0, z = acc.z || 0;
+  return Math.sqrt(x * x + y * y + z * z);
+}
+
+/* ===== hy_onMotion =====
+ * 功能: deviceMotion 事件回调 — 超过阈值触发摇一摇
+ * 参数: e - DeviceMotionEvent
+ * 返回: 无
+ */
+function hy_onMotion(e) {
+  const mag = hy_computeAcceleration(e);
+  if (mag === null) return;
+
+  hy_state.lastShakeMag = mag;
+
+  // 阈值判断（约 18 触发）
+  if (mag > hy_state.shakeThreshold) {
+    hy_doShake('motion');
+  }
+}
+
+/* ===== hy_doShake =====
+ * 功能: 执行一次摇一摇（冷却 + 抽菜 + 弹窗）
+ * 参数: source - 'motion'（设备触发）或 'fallback'（手动按钮）
+ * 返回: 无
+ */
+function hy_doShake(source) {
+  // 冷却检查
+  const now = Date.now();
+  if (now < hy_state.cooldownEnd) {
+    // 冷却中不触发（但手动点击 fallback 不冷却——降级方案用户体验优先）
+    if (source === 'motion') return;
+  }
+
+  // 设置冷却
+  hy_state.cooldownEnd = now + hy_state.cooldownMs;
+  hy_showCooldown(true);
+
+  // 播放抖动动画
+  const box = document.getElementById('hy_shakeBox');
+  box.classList.add('hy_shaking');
+  setTimeout(function() { box.classList.remove('hy_shaking'); }, 500);
+
+  // 延迟抽菜（等动画差不多结束再弹，更有仪式感）
+  setTimeout(function() {
+    hy_pickDish();
+    hy_showCooldown(false);
+  }, 350);
+}
+
+/* ===== hy_pickDish =====
+ * 功能: 随机抽取一道菜 + 弹窗显示
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_pickDish() {
+  const dish = HY_DISHES[Math.floor(Math.random() * HY_DISHES.length)];
+  document.getElementById('hy_resultIcon').textContent = dish.icon;
+  document.getElementById('hy_resultName').textContent = dish.name;
+  document.getElementById('hy_resultPrice').textContent = dish.price;
+  document.getElementById('hy_resultIntro').textContent = dish.intro;
+  document.getElementById('hy_mask').classList.add('hy_show');
+}
+
+/* ===== hy_closeResult =====
+ * 功能: 关闭结果弹窗
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_closeResult() {
+  document.getElementById('hy_mask').classList.remove('hy_show');
+}
+
+/* ===== hy_showCooldown =====
+ * 功能: 显示/隐藏冷却遮罩
+ * 参数: show - boolean
+ * 返回: 无
+ */
+function hy_showCooldown(show) {
+  document.getElementById('hy_cooldown').classList.toggle('hy_show', show);
+}
+
+/* ===== hy_showFallback =====
+ * 功能: 显示/隐藏降级面板（设备不支持时）
+ * 参数: show - boolean
+ * 返回: 无
+ */
+function hy_showFallback(show) {
+  document.getElementById('hy_fallback').classList.toggle('hy_show', show);
+}
+
+/* ===== hy_startMotionListener =====
+ * 功能: 绑定 deviceMotion 监听
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_startMotionListener() {
+  window.addEventListener('devicemotion', hy_onMotion);
+  hy_state.motionSupported = true;
+}
+
+/* ===== hy_bindTap =====
+ * 功能: 给 shakeBox 绑定点击（开发时方便测试，桌面也能"点"触发）
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_bindTap() {
+  const box = document.getElementById('hy_shakeBox');
+  box.addEventListener('click', function() {
+    hy_doShake('tap');
+  });
+}
+
+/* ===== hy_init =====
+ * 功能: 初始化 — 检测环境 + 绑定事件
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_init() {
+  hy_state.isIOS = hy_isIOS();
+
+  // 情况 A：iOS 且需要授权 → 显示权限按钮
+  if (hy_state.isIOS
+      && typeof DeviceMotionEvent !== 'undefined'
+      && typeof DeviceMotionEvent.requestPermission === 'function') {
+    document.getElementById('hy_iosBtn').classList.add('hy_show');
+  }
+  // 情况 B：有 deviceMotion（Android / 授权过的 iOS）→ 直接绑定
+  else if ('DeviceMotionEvent' in window) {
+    hy_startMotionListener();
+  }
+  // 情况 C：完全不支持 → 显示降级面板
+  else {
+    hy_showFallback(true);
+    console.warn('❌ 当前环境不支持 deviceMotion');
+  }
+
+  // 点击盒子也能抽（通用降级 + 桌面开发测试）
+  hy_bindTap();
+}
+
+document.addEventListener('DOMContentLoaded', hy_init);
+</script>
+
+</body>
+</html>
