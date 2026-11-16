@@ -19,12 +19,11 @@
 <title>摇一摇 · 今日菜谱</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{height:100%;overflow:hidden;}
+  html,body{min-height:100%;}
   body{
     font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
     background:radial-gradient(ellipse at center,#3a1a0a 0%,#1a0804 100%);
     color:#fff;text-align:center;
-    touch-action:none;
     display:flex;flex-direction:column;align-items:center;
   }
 
@@ -32,6 +31,18 @@
   .hy_top{width:100%;max-width:420px;margin-top:18px;padding:0 16px;display:flex;justify-content:space-between;align-items:center;}
   .hy_home{color:#ffd97a;text-decoration:none;font-size:13px;}
   .hy_sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#a67c52;letter-spacing:.1em;}
+
+  /* ===== 演示视频 ===== */
+  .hy_video_wrap{
+    width:100%;max-width:420px;margin:14px auto 0;padding:0 16px;
+  }
+  .hy_video_title{font-size:12px;color:#ffd97a;margin-bottom:8px;padding-left:4px;letter-spacing:.1em;text-align:left;}
+  .hy_video_title b{color:#fff;}
+  .hy_video_wrap video{
+    width:100%;border-radius:10px;background:#000;
+    touch-action:auto;
+    box-shadow:0 4px 20px rgba(0,0,0,.5);
+  }
 
   /* ===== 标题 ===== */
   .hy_title{margin-top:30px;margin-bottom:20px;}
@@ -126,6 +137,11 @@
 <div class="hy_top">
   <a href="index.html" class="hy_home">← 返回首页</a>
   <span class="hy_sub">HY · SENSOR · SHAKE</span>
+</div>
+
+<div class="hy_video_wrap">
+  <div class="hy_video_title">📹 <b>演示视频</b> · 摇一摇抽菜谱</div>
+  <video controls playsinline preload="metadata" src="vedio/sensor-demo.mp4"></video>
 </div>
 
 <div class="hy_title">

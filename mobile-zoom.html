@@ -19,28 +19,39 @@
 <title>图片查看器 · 双指缩放</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{height:100%;overflow:hidden;}
+  html,body{height:100%;}
   body{
     font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
     background:#0a0a0a;color:#fff;
-    touch-action:none;           /* 禁止浏览器默认手势，图片自己处理 */
     user-select:none;
     -webkit-user-select:none;
+    display:flex;flex-direction:column;
   }
 
   /* ===== 顶部导航 ===== */
   .hy_top{
-    position:fixed;top:0;left:0;right:0;z-index:10;
+    flex-shrink:0;
     display:flex;justify-content:space-between;align-items:center;
-    padding:14px 18px;background:linear-gradient(180deg,rgba(0,0,0,.8),rgba(0,0,0,0));
+    padding:14px 18px;background:#0a0a0a;border-bottom:1px solid #222;
   }
   .hy_home{color:#ffd97a;text-decoration:none;font-size:13px;}
   .hy_home:hover{color:#fff;}
   .hy_info{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.1em;}
 
+  /* ===== 演示视频 ===== */
+  .hy_video_wrap{
+    flex-shrink:0;padding:12px;background:#0a0a0a;border-bottom:1px solid #222;
+  }
+  .hy_video_title{font-size:12px;color:#ffd97a;margin-bottom:8px;padding-left:4px;letter-spacing:.1em;}
+  .hy_video_title b{color:#fff;}
+  .hy_video_wrap video{
+    width:100%;border-radius:8px;background:#000;
+    touch-action:auto;         /* 视频区域允许点击/滚动 */
+  }
+
   /* ===== 缩放比例指示器 ===== */
   .hy_scale_badge{
-    position:fixed;top:54px;left:50%;transform:translateX(-50%);
+    position:fixed;top:6px;left:50%;transform:translateX(-50%);
     background:rgba(0,0,0,.7);color:#ffd97a;
     font-family:"SF Mono",Consolas,monospace;font-size:12px;padding:4px 14px;
     border-radius:999px;letter-spacing:.1em;z-index:10;
@@ -50,8 +61,8 @@
 
   /* ===== 图片容器（核心：overflow:hidden + touch-action:none）===== */
   .hy_viewer{
-    width:100%;height:100%;overflow:hidden;
-    position:relative;
+    flex:1;min-height:360px;overflow:hidden;
+    position:relative;touch-action:none;
   }
 
   /* ===== 图片（transform 统一通过 translate + scale）===== */
@@ -64,10 +75,10 @@
 
   /* ===== 底部说明 ===== */
   .hy_hint{
-    position:fixed;bottom:0;left:0;right:0;z-index:10;
-    background:linear-gradient(0deg,rgba(0,0,0,.8),rgba(0,0,0,0));
-    padding:16px 18px;text-align:center;font-size:11.5px;
+    flex-shrink:0;
+    padding:12px 18px;text-align:center;font-size:11.5px;
     color:rgba(255,255,255,.65);line-height:1.9;
+    background:#0a0a0a;border-top:1px solid #222;
   }
   .hy_hint b{color:#ffd97a;}
 </style>
@@ -77,6 +88,11 @@
 <div class="hy_top">
   <a href="index.html" class="hy_home">← 返回首页</a>
   <span class="hy_info">HY · ZOOM · PINCH</span>
+</div>
+
+<div class="hy_video_wrap">
+  <div class="hy_video_title">📹 <b>演示视频</b> · 双指 pinch / 双击 / 拖动</div>
+  <video controls playsinline preload="metadata" src="vedio/zoom-demo.mp4"></video>
 </div>
 
 <div class="hy_scale_badge" id="hy_scaleBadge">1.0x</div>
