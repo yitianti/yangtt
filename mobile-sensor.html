@@ -32,16 +32,15 @@
   .hy_home{color:#ffd97a;text-decoration:none;font-size:13px;}
   .hy_sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#a67c52;letter-spacing:.1em;}
 
-  /* ===== 演示视频 ===== */
+  /* ===== 演示视频（底部小尺寸）===== */
   .hy_video_wrap{
-    width:100%;max-width:420px;margin:14px auto 0;padding:0 16px;
+    width:100%;max-width:420px;margin:14px auto 0;padding:0 16px 24px;
   }
-  .hy_video_title{font-size:12px;color:#ffd97a;margin-bottom:8px;padding-left:4px;letter-spacing:.1em;text-align:left;}
+  .hy_video_title{font-size:11px;color:#ffd97a;margin-bottom:6px;text-align:left;letter-spacing:.1em;}
   .hy_video_title b{color:#fff;}
   .hy_video_wrap video{
-    width:100%;border-radius:10px;background:#000;
-    touch-action:auto;
-    box-shadow:0 4px 20px rgba(0,0,0,.5);
+    width:48%;max-width:200px;border-radius:6px;background:#000;
+    touch-action:auto;box-shadow:0 2px 10px rgba(0,0,0,.5);
   }
 
   /* ===== 标题 ===== */
@@ -139,11 +138,6 @@
   <span class="hy_sub">HY · SENSOR · SHAKE</span>
 </div>
 
-<div class="hy_video_wrap">
-  <div class="hy_video_title">📹 <b>演示视频</b> · 摇一摇抽菜谱</div>
-  <video controls playsinline preload="metadata" src="vedio/sensor-demo.mp4"></video>
-</div>
-
 <div class="hy_title">
   <h1>🍽️ 摇一摇 · 今日菜谱</h1>
   <p>摇一摇手机，随机为你抽一道菜</p>
@@ -167,6 +161,11 @@
 <div class="hy_hint">
   <b>💡 iOS 用户</b>：Safari 13+ 需点击按钮授权陀螺仪权限<br>
   <b>阈值 18</b> · <b>冷却 1.5s</b> · <b>random 从 4 道菜里抽</b>
+</div>
+
+<div class="hy_video_wrap">
+  <div class="hy_video_title">📹 <b>演示视频</b> · 摇一摇抽菜谱</div>
+  <video controls playsinline preload="metadata" src="vedio/sensor-demo.mp4"></video>
 </div>
 
 <!-- 结果弹窗 -->

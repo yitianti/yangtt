@@ -1,0 +1,140 @@
+<!--
+  作者: 杨婷婷
+  建立时间: 2026-11-16
+  使用模型: Trae
+  功能名称: 移动端互动四任务合集入口页
+  功能简介: 四个课堂任务（事件侦探、手势卡片、图片缩放、摇一摇）的合集导航页
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>移动端互动四任务合集</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:#0f0f14;color:#e8e8e8;min-height:100vh;
+    padding:24px 18px 60px;
+  }
+
+  /* ===== 顶部 ===== */
+  .hy_top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+  .hy_home{color:#ffd97a;text-decoration:none;font-size:14px;}
+  .hy_home:hover{color:#fff;}
+  .hy_sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#666;letter-spacing:.1em;}
+
+  /* ===== 标题 ===== */
+  .hy_title{text-align:center;margin-bottom:32px;}
+  .hy_title h1{font-size:22px;color:#fff;letter-spacing:.05em;}
+  .hy_title p{font-size:13px;color:#888;margin-top:6px;}
+
+  /* ===== 卡片网格 ===== */
+  .hy_grid{
+    display:grid;gap:14px;max-width:720px;margin:0 auto;
+    grid-template-columns:1fr;
+  }
+  @media(min-width:620px){
+    .hy_grid{grid-template-columns:1fr 1fr;}
+  }
+
+  /* ===== 卡片 ===== */
+  .hy_card{
+    display:block;text-decoration:none;
+    background:linear-gradient(135deg,#1a1a24 0%,#12121a 100%);
+    border:1px solid #262636;border-radius:14px;
+    padding:20px;color:inherit;
+    transition:transform .2s,border-color .2s,box-shadow .2s;
+    position:relative;overflow:hidden;
+  }
+  .hy_card:hover{
+    transform:translateY(-3px);border-color:#ffd97a;
+    box-shadow:0 8px 24px rgba(255,217,122,.12);
+  }
+  .hy_card::before{
+    content:"";position:absolute;top:-40px;right:-40px;
+    width:120px;height:120px;border-radius:50%;
+    opacity:.08;pointer-events:none;
+  }
+  .hy_card.hy_c1::before{background:#ff8a5b;}
+  .hy_card.hy_c2::before{background:#7ec8e3;}
+  .hy_card.hy_c3::before{background:#a8e6cf;}
+  .hy_card.hy_c4::before{background:#ffd97a;}
+
+  .hy_num{
+    font-family:"SF Mono",Consolas,monospace;
+    font-size:11px;color:#666;letter-spacing:.15em;
+    margin-bottom:8px;
+  }
+  .hy_emoji{font-size:28px;display:block;margin-bottom:6px;}
+  .hy_card h2{font-size:17px;color:#fff;margin-bottom:6px;letter-spacing:.02em;}
+  .hy_card p{font-size:12.5px;color:#999;line-height:1.7;}
+  .hy_tag{
+    display:inline-block;margin-top:10px;
+    font-size:11px;color:#ffd97a;background:rgba(255,217,122,.08);
+    padding:2px 10px;border-radius:999px;letter-spacing:.05em;
+  }
+
+  .hy_arrow{
+    position:absolute;right:18px;bottom:16px;
+    color:#555;font-size:18px;
+    transition:transform .2s,color .2s;
+  }
+  .hy_card:hover .hy_arrow{transform:translateX(4px);color:#ffd97a;}
+</style>
+</head>
+<body>
+
+<div class="hy_top">
+  <a href="index.html" class="hy_home">← 返回首页</a>
+  <span class="hy_sub">HY · MOBILE · HUB</span>
+</div>
+
+<div class="hy_title">
+  <h1>📱 移动端互动四任务</h1>
+  <p>点击卡片进入对应课堂任务</p>
+</div>
+
+<div class="hy_grid">
+
+  <a class="hy_card hy_c1" href="mobile-probe.html">
+    <div class="hy_num">TASK · 01</div>
+    <span class="hy_emoji">🔍</span>
+    <h2>事件侦探 · 触摸事件探针</h2>
+    <p>在触摸区触发 touchstart / touchmove / touchend / touchcancel，实时日志面板观察事件序列</p>
+    <span class="hy_tag">touch 基础</span>
+    <span class="hy_arrow">›</span>
+  </a>
+
+  <a class="hy_card hy_c2" href="mobile-gesture.html">
+    <div class="hy_num">TASK · 02</div>
+    <span class="hy_emoji">👆👆</span>
+    <h2>手势卡片 · 四道菜左右滑</h2>
+    <p>touchstart/move/end 阈值 40px 切卡，动画锁 320ms 防连滑；横向优先于纵向</p>
+    <span class="hy_tag">手势方向识别</span>
+    <span class="hy_arrow">›</span>
+  </a>
+
+  <a class="hy_card hy_c3" href="mobile-zoom.html">
+    <div class="hy_num">TASK · 03</div>
+    <span class="hy_emoji">🔎</span>
+    <h2>图片查看器 · 双指 pinch 缩放</h2>
+    <p>1x~4x pinch 不跳走（锁定两指中点物理坐标）+ 双击 1x↔2x + 放大后拖动</p>
+    <span class="hy_tag">多指 + 变换</span>
+    <span class="hy_arrow">›</span>
+  </a>
+
+  <a class="hy_card hy_c4" href="mobile-sensor.html">
+    <div class="hy_num">TASK · 04</div>
+    <span class="hy_emoji">📱📱</span>
+    <h2>摇一摇彩蛋 · DeviceMotion</h2>
+    <p>accelerationIncludingGravity 合成加速度，阈值 18 触发，冷却 1500ms；iOS 13+ 授权</p>
+    <span class="hy_tag">传感器 API</span>
+    <span class="hy_arrow">›</span>
+  </a>
+
+</div>
+
+</body>
+</html>
