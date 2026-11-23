@@ -1,0 +1,268 @@
+<!--
+  作者: 杨婷婷
+  建立时间: 2026-11-23
+  使用模型: Trae
+  功能名称: LLM 实践操作演示页
+  功能简介: 展示课程实践中的四个 LLM 操作模块——AI 客服切换（硅基流动/七牛）、知识库、图像识别、语音识别
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LLM 实践操作演示</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:#0f0f14;color:#e8e8e8;min-height:100vh;
+    padding:24px 18px 60px;
+  }
+
+  /* ===== 顶部 ===== */
+  .hy_top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;max-width:900px;margin-left:auto;margin-right:auto;}
+  .hy_home{color:#ffd97a;text-decoration:none;font-size:14px;}
+  .hy_home:hover{color:#fff;}
+  .hy_sub{font-family:"SF Mono",Consolas,monospace;font-size:11px;color:#666;letter-spacing:.1em;}
+
+  /* ===== 标题 ===== */
+  .hy_title{text-align:center;margin-bottom:36px;max-width:900px;margin-left:auto;margin-right:auto;}
+  .hy_title h1{font-size:24px;color:#fff;letter-spacing:.05em;margin-bottom:8px;}
+  .hy_title h1::before,.hy_title h1::after{content:"✨";margin:0 10px;font-size:18px;}
+  .hy_title p{font-size:13px;color:#888;line-height:1.7;}
+
+  /* ===== 版块容器 ===== */
+  .hy_section{
+    max-width:900px;margin:0 auto 36px;
+    background:linear-gradient(135deg,#1a1a24 0%,#12121a 100%);
+    border:1px solid #262636;border-radius:16px;
+    padding:22px 22px 24px;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .hy_section:hover{
+    border-color:#ffd97a;
+    box-shadow:0 6px 20px rgba(255,217,122,.08);
+  }
+
+  /* ===== 版块头部 ===== */
+  .hy_sec_head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .hy_sec_num{
+    font-family:"SF Mono",Consolas,monospace;
+    font-size:11px;color:#666;letter-spacing:.15em;
+  }
+  .hy_sec_emoji{font-size:22px;}
+  .hy_sec_title{font-size:17px;color:#fff;letter-spacing:.02em;}
+  .hy_sec_tag{
+    margin-left:auto;font-size:11px;padding:2px 10px;border-radius:999px;
+    letter-spacing:.05em;
+  }
+  .hy_sec_tag.hy_t1{color:#ff8a5b;background:rgba(255,138,91,.1);}
+  .hy_sec_tag.hy_t2{color:#7ec8e3;background:rgba(126,200,227,.1);}
+  .hy_sec_tag.hy_t3{color:#a8e6cf;background:rgba(168,230,207,.1);}
+  .hy_sec_tag.hy_t4{color:#ffd97a;background:rgba(255,217,122,.1);}
+
+  /* ===== 版块说明 ===== */
+  .hy_sec_desc{
+    font-size:13px;color:#aaa;line-height:1.8;margin-bottom:16px;
+    padding-left:12px;border-left:2px solid #333;
+  }
+
+  /* ===== 截图网格 ===== */
+  .hy_shots{
+    display:grid;gap:14px;
+    grid-template-columns:1fr;
+  }
+  @media(min-width:560px){
+    .hy_shots{grid-template-columns:1fr 1fr;}
+  }
+  .hy_shot{
+    display:block;border-radius:10px;overflow:hidden;
+    border:1px solid #2a2a3a;background:#000;
+    cursor:zoom-in;transition:transform .2s,border-color .2s;
+    text-decoration:none;position:relative;
+  }
+  .hy_shot:hover{transform:translateY(-2px);border-color:#ffd97a;}
+  .hy_shot img{
+    width:100%;height:auto;display:block;
+    loading="lazy";
+  }
+  .hy_shot_cap{
+    display:block;padding:8px 12px;
+    background:#1a1a24;border-top:1px solid #2a2a3a;
+    font-size:11.5px;color:#888;text-align:center;letter-spacing:.03em;
+  }
+
+  /* ===== 单张大图（没截全的模块让它窄一点居中）===== */
+  .hy_shot.hy_single{max-width:420px;margin:0 auto;}
+
+  /* ===== 图片灯箱（点击放大）===== */
+  .hy_lightbox{
+    position:fixed;inset:0;background:rgba(0,0,0,.92);
+    display:none;align-items:center;justify-content:center;
+    z-index:9999;padding:20px;cursor:zoom-out;
+  }
+  .hy_lightbox.hy_show{display:flex;}
+  .hy_lightbox img{
+    max-width:100%;max-height:100%;
+    border-radius:6px;box-shadow:0 8px 40px rgba(0,0,0,.8);
+  }
+  .hy_lightbox_close{
+    position:absolute;top:16px;right:22px;
+    color:#fff;font-size:28px;cursor:pointer;
+    opacity:.7;transition:opacity .2s;
+    font-family:"SF Mono",Consolas,monospace;
+  }
+  .hy_lightbox_close:hover{opacity:1;color:#ffd97a;}
+  .hy_lightbox_cap{
+    position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+    color:#aaa;font-size:12px;letter-spacing:.1em;
+  }
+</style>
+</head>
+<body>
+
+<div class="hy_top">
+  <a href="index.html" class="hy_home">← 返回首页</a>
+  <span class="hy_sub">HY · LLM · DEMO</span>
+</div>
+
+<div class="hy_title">
+  <h1>LLM 实践操作演示</h1>
+  <p>课程实践中的四个 AI 能力模块 · 点击截图可放大查看</p>
+</div>
+
+<!-- ===== 模块一：AI 客服切换 ===== -->
+<div class="hy_section">
+  <div class="hy_sec_head">
+    <span class="hy_sec_num">MODULE · 01</span>
+    <span class="hy_sec_emoji">🤖</span>
+    <span class="hy_sec_title">AI 客服 · 硅基流动 / 七牛 切换</span>
+    <span class="hy_sec_tag hy_t1">下拉框 + 对话</span>
+  </div>
+  <div class="hy_sec_desc">
+    前端通过下拉框切换 AI 服务商（硅基流动 / 七牛），后端读取配置即可切换模型来源；<br>
+    切换后可立即在同一个对话框中发起对话，演示两种 API 响应差异。
+  </div>
+  <div class="hy_shots">
+    <a class="hy_shot" href="img/LLM/AI_1.png" data-cap="硅基流动 AI 客服界面">
+      <img src="img/LLM/AI_1.png" alt="AI客服截图1">
+      <span class="hy_shot_cap">🔼 硅基流动 · 对话界面</span>
+    </a>
+    <a class="hy_shot" href="img/LLM/AI_2.png" data-cap="七牛 AI 客服界面">
+      <img src="img/LLM/AI_2.png" alt="AI客服截图2">
+      <span class="hy_shot_cap">🔼 七牛 · 切换后对话</span>
+    </a>
+  </div>
+</div>
+
+<!-- ===== 模块二：知识库 ===== -->
+<div class="hy_section">
+  <div class="hy_sec_head">
+    <span class="hy_sec_num">MODULE · 02</span>
+    <span class="hy_sec_emoji">📚</span>
+    <span class="hy_sec_title">知识库 · 上传文件 + 功能验证</span>
+    <span class="hy_sec_tag hy_t2">RAG</span>
+  </div>
+  <div class="hy_sec_desc">
+    用户自行上传文档文件构建向量知识库，随后通过提问验证检索增强生成（RAG）是否正确引用了上传内容。
+  </div>
+  <div class="hy_shots">
+    <a class="hy_shot" href="img/LLM/zsk_1.png" data-cap="知识库上传文件界面">
+      <img src="img/LLM/zsk_1.png" alt="知识库截图1">
+      <span class="hy_shot_cap">🔼 文件上传 · 构建知识库</span>
+    </a>
+    <a class="hy_shot" href="img/LLM/zsk_2.png" data-cap="知识库功能验证界面">
+      <img src="img/LLM/zsk_2.png" alt="知识库截图2">
+      <span class="hy_shot_cap">🔼 提问验证 · RAG 检索</span>
+    </a>
+  </div>
+</div>
+
+<!-- ===== 模块三：图像识别 ===== -->
+<div class="hy_section">
+  <div class="hy_sec_head">
+    <span class="hy_sec_num">MODULE · 03</span>
+    <span class="hy_sec_emoji">🖼️</span>
+    <span class="hy_sec_title">图像识别 · 上传图片 + 测试</span>
+    <span class="hy_sec_tag hy_t3">Vision</span>
+  </div>
+  <div class="hy_sec_desc">
+    上传本地图片，调用多模态大模型进行视觉理解，返回识别结果（物体 / 文字 / 场景描述）。
+  </div>
+  <div class="hy_shots">
+    <a class="hy_shot hy_single" href="img/LLM/txsb.png" data-cap="图像识别测试界面">
+      <img src="img/LLM/txsb.png" alt="图像识别截图">
+      <span class="hy_shot_cap">🔼 图像识别 · 上传 → 识别结果</span>
+    </a>
+  </div>
+</div>
+
+<!-- ===== 模块四：语音识别 ===== -->
+<div class="hy_section">
+  <div class="hy_sec_head">
+    <span class="hy_sec_num">MODULE · 04</span>
+    <span class="hy_sec_emoji">🎤</span>
+    <span class="hy_sec_title">语音识别 · 测试功能</span>
+    <span class="hy_sec_tag hy_t4">ASR</span>
+  </div>
+  <div class="hy_sec_desc">
+    录音或上传音频文件，通过语音识别（ASR）转文字，验证模型对中文语音的识别准确率。
+  </div>
+  <div class="hy_shots">
+    <a class="hy_shot hy_single" href="img/LLM/yysb.png" data-cap="语音识别测试界面">
+      <img src="img/LLM/yysb.png" alt="语音识别截图">
+      <span class="hy_shot_cap">🔼 语音识别 · 录音 → 转文字</span>
+    </a>
+  </div>
+</div>
+
+<!-- ===== 图片灯箱 ===== -->
+<div class="hy_lightbox" id="hy_lightbox">
+  <span class="hy_lightbox_close">✕ 关闭</span>
+  <img id="hy_lb_img" src="" alt="放大预览">
+  <div class="hy_lightbox_cap" id="hy_lb_cap"></div>
+</div>
+
+<script>
+/* ===== hy_initLightbox =====
+ * 功能: 绑定所有 .hy_shot 点击事件，弹出灯箱放大截图
+ * 参数: 无
+ * 返回: 无
+ */
+function hy_initLightbox() {
+  const lb = document.getElementById('hy_lightbox');
+  const lbImg = document.getElementById('hy_lb_img');
+  const lbCap = document.getElementById('hy_lb_cap');
+  const shots = document.querySelectorAll('.hy_shot');
+
+  shots.forEach(function(shot) {
+    shot.addEventListener('click', function(e) {
+      e.preventDefault();
+      const href = this.getAttribute('href');
+      const cap = this.getAttribute('data-cap') || '';
+      lbImg.src = href;
+      lbCap.textContent = cap;
+      lb.classList.add('hy_show');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  // 点击遮罩 / 关闭 / Esc 都能关
+  lb.addEventListener('click', function() {
+    lb.classList.remove('hy_show');
+    lbImg.src = '';
+    document.body.style.overflow = '';
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && lb.classList.contains('hy_show')) {
+      lb.classList.remove('hy_show');
+      lbImg.src = '';
+      document.body.style.overflow = '';
+    }
+  });
+}
+
+hy_initLightbox();
+</script>
+</body>
+</html>

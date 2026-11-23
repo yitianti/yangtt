@@ -227,6 +227,13 @@ swiper-vertical.html — 左右并排对比两轮产出，同样的 nature 图�
 
 ---
 
+### 时间: 2026-11-23
+### 使用模型: Trae
+### 提示词:
+新建 LLM 实践操作演示页 llm-demo.html，包含四部分：1) AI 客服切换（硅基流动/七牛）· 图片 AI_1.png AI_2.png；2) 知识库 · zsk_1.png zsk_2.png；3) 图像识别 · txsb.png；4) 语音识别 · yysb.png。图片在 img/LLM/ 下。首页 index.html 加入口。风格与 mobile-hub.html 保持一致（深色主题、卡片、hy_ 前缀）。点击截图可放大（lightbox）。
+
+---
+
 **时间**：2026-11-16（第四次）  
 **模型**：Trae  
 **提示词**：
